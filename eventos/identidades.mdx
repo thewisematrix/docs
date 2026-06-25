@@ -1,8 +1,266 @@
 ---
 title: "Identidades"
-description: "Resolução e unificação de identidades."
+description: "Como o PrismaFlow decide a qual pessoa cada evento pertence — e como configurar seus identificadores (ID de login, e-mail, telefone, aparelho)."
 ---
 
+Toda vez que um evento chega, o PrismaFlow precisa responder uma pergunta: **de quem é esse
+evento?** As **identidades** são as regras que respondem isso. Esse processo de descobrir o
+dono do evento se chama **resolução de identidade**.
+
+Uma **identidade** (ou _tipo de identidade_) é a configuração de **um tipo de identificador**
+que aparece nos seus eventos — por exemplo `external_id` (ID de login), `email`, `phone` ou
+`device_id`. Ela não é o valor em si; é a _regra_ de como aquele identificador se comporta na
+hora de ligar um evento a uma pessoa (um **perfil**).
+
 <Note>
-  Página em construção. Vamos escrever este tema juntos no próximo passo.
+  Pense nas identidades como **chaves** que ligam um evento a uma pessoa. Algumas chaves são
+  fortes e exclusivas (um ID de login); outras são fracas e compartilhadas (um aparelho que a
+  família inteira usa). Configurar bem essas chaves é o que mantém os perfis certos.
 </Note>
+
+<Tip>
+  **Não existe lista fixa de identificadores.** Você não está preso a `external_id`, `email`,
+  `phone` ou `device_id` — esses são só exemplos comuns que usamos ao longo da página. Qualquer
+  chave que você enviar nos seus eventos vira um tipo de identidade: `cpf`, `matricula`,
+  `id_assinatura`, `loyalty_card`… o que fizer sentido pro seu negócio. O que importa não é o
+  nome, e sim **configurar bem** cada um (é único? qual a força? permite merge?).
+</Tip>
+
+## As identidades nascem sozinhas
+
+Você **não cria** identidades na mão. Quando os primeiros eventos chegam, o PrismaFlow
+**detecta automaticamente** cada tipo de identificador e cria um card para ele — só que ainda
+como _rascunho_ (não configurado). O nome do card é exatamente a chave que veio no evento, seja
+ela qual for — você decide o que enviar.
+
+Enquanto um tipo está como rascunho, **todo evento que depende dele vai para a
+[Quarentena](/eventos/quarentena)** de propósito — até você abrir o card e salvar a
+configuração. É o jeito do PrismaFlow dizer "me diga como tratar essa chave antes de eu usar
+de verdade".
+
+<Warning>
+  Depois dos primeiros eventos, **abra cada card e salve** — mesmo sem mudar nada. Isso marca o
+  tipo como configurado e libera os eventos da quarentena.
+</Warning>
+
+## A aba Identidades
+
+Os tipos ficam na aba **Identidades**, dentro de **Eventos**. Cada card é um tipo de
+identidade e resume a configuração dele.
+
+<Frame caption="Cada card é um tipo de identidade: força (strength), regras (único, merge) e normalização. Clique no card para configurar.">
+  <img src="/images/anotadas/identities-list.png?v=1" alt="Aba Identidades com os cards external_id, phone e device_id" />
+</Frame>
+
+## Configurar uma identidade
+
+Clique em um card para abrir a configuração. Ela tem três seções:
+
+<Steps>
+  <Step title="Básico — nome e liga/desliga">
+    O **nome** vem dos eventos e **não pode ser alterado**. O toggle **Habilitado** liga ou
+    desliga o processamento desse tipo — desabilitar **não apaga** nada, só faz o resolver
+    deixar de processar novos valores desse tipo.
+
+    <Frame caption="Seção Básico: nome (vem dos eventos) e o toggle Habilitado.">
+      <img src="/images/anotadas/identity-basics.png?v=1" alt="Seção Básico da configuração de identidade" />
+    </Frame>
+  </Step>
+
+  <Step title="Normalização — padronizar o valor">
+    A **normalização** padroniza o valor **antes** de comparar, pra que o mesmo dado escrito de
+    formas diferentes seja tratado como igual. Há um campo de teste pra você digitar um valor e
+    ver como ele fica.
+
+    <Frame caption="Seção Normalização: escolha o formato e teste o resultado.">
+      <img src="/images/anotadas/identity-normalization.png?v=1" alt="Seção Normalização da configuração de identidade" />
+    </Frame>
+
+    | Normalização | O que faz | Exemplo |
+    | --- | --- | --- |
+    | Nenhuma | Usa o valor como veio | `u_42` → `u_42` |
+    | E-mail (minúsculo) | Deixa minúsculo e tira espaços | `Ana@X.com` → `ana@x.com` |
+    | Telefone (E.164) | Só dígitos, com `+` na frente | `(11) 99999-0000` → `+5511999990000` |
+    | Só dígitos | Remove tudo que não é número | `123.456-7` → `1234567` |
+    | Texto (minúsculo) | Minúsculo e sem espaços nas pontas | `  ABC ` → `abc` |
+  </Step>
+
+  <Step title="Resolução & Unicidade — o coração da regra">
+    Aqui você define **como** esse identificador participa de ligar eventos a perfis.
+
+    <Frame caption="Seção Resolução & Unicidade: força, único e permitir merge.">
+      <img src="/images/anotadas/identity-resolution-and-unicidade.png?v=1" alt="Seção Resolução e Unicidade da configuração de identidade" />
+    </Frame>
+
+    <CardGroup cols={1}>
+      <Card title="Strength (força, 1–5)" icon="gauge">
+        O **peso** desse identificador. Quando mais de um perfil disputa um evento, vence o de
+        maior soma de força. Dê força alta aos identificadores mais confiáveis.
+      </Card>
+      <Card title="Único" icon="fingerprint">
+        Se ligado, cada valor desse tipo pertence a **no máximo um perfil**. Só identificadores
+        **únicos** servem de **âncora** para casar um evento a um perfil que já existe.
+      </Card>
+      <Card title="Permitir merge" icon="arrows-to-circle">
+        Se ligado, um conflito (o mesmo evento apontando para 2+ perfis) **funde os perfis
+        automaticamente**. Se desligado, o evento vai para a **Quarentena**.
+      </Card>
+    </CardGroup>
+
+    Ao salvar, o tipo passa a ser considerado **configurado** (e sai da quarentena).
+  </Step>
+</Steps>
+
+## Como a resolução funciona
+
+Para cada evento, o PrismaFlow normaliza os identificadores e procura o perfil dono. A regra
+central é simples:
+
+- **Só identidades marcadas como "Único" casam** um evento a um perfil existente. Um
+  identificador não-único (um `device_id` compartilhado) nunca casa sozinho.
+- Se mais de um perfil casar, a **força (strength)** decide o vencedor.
+
+O resultado cai em um de três caminhos:
+
+<CardGroup cols={3}>
+  <Card title="Nenhum perfil casa" icon="user-plus">
+    O PrismaFlow **cria um perfil novo** e liga todos os identificadores a ele.
+  </Card>
+  <Card title="Um perfil casa" icon="user-check">
+    Usa o perfil existente e **anexa** os identificadores novos do evento.
+  </Card>
+  <Card title="Dois ou mais casam" icon="users">
+    **Conflito.** Aí entram as regras de merge — funde os perfis ou manda para a quarentena.
+  </Card>
+</CardGroup>
+
+## Merge: quando perfis se juntam
+
+Esse é o lado mais dinâmico das identidades. Um **merge** acontece quando **o mesmo evento**
+casa, via identificadores únicos, com **dois ou mais perfis que hoje existem separados**.
+
+A trava de segurança: o merge **só dispara se todos os tipos envolvidos no casamento tiverem
+"Permitir merge" ligado**. Basta um deles não permitir para o evento ir à quarentena em vez de
+fundir.
+
+### Exemplo prático: uma pessoa, quatro fragmentos
+
+Imagine um e-commerce. A mesma pessoa apareceu fragmentada em vários perfis ao longo do tempo,
+e um dia ela faz **login autenticado** — e o evento traz todos os identificadores juntos.
+
+Identidades configuradas:
+
+| Tipo | Força | Único | Permitir merge |
+| --- | --- | --- | --- |
+| `external_id` (ID de login) | 5 | Sim | Sim |
+| `email` | 4 | Sim | Sim |
+| `phone` | 4 | Sim | Sim |
+| `device_id` (aparelho) | 1 | Não | Não |
+
+Como estavam os perfis **antes** do evento:
+
+- **Perfil A** — visto no app, conhecido pelo `phone`.
+- **Perfil B** — visto no site, conhecido pelo `email`.
+- **Perfil C** — cadastro antigo, conhecido pelo `external_id`.
+
+Aí chega o evento de login, trazendo tudo de uma vez:
+
+```json
+{
+  "identifiers": {
+    "external_id": "u_42",
+    "email": "Ana@X.com",
+    "phone": "(11) 99999-0000",
+    "device_id": "dev-abc"
+  }
+}
+```
+
+<Steps>
+  <Step title="Normaliza os valores">
+    `email` → `ana@x.com`, `phone` → `+5511999990000`, `external_id` → `u_42`.
+  </Step>
+  <Step title="Procura candidatos (só os únicos casam)">
+    `external_id` aponta para o Perfil C, `email` para o B, `phone` para o A. O `device_id` é
+    **não-único**, então é ignorado nessa disputa.
+  </Step>
+  <Step title="Soma a força para escolher o vencedor">
+    C = 5, B = 4, A = 4. Vence o **Perfil C** (`external_id`, força 5).
+  </Step>
+  <Step title="Confere a permissão de merge">
+    Os tipos que casaram (`external_id`, `email`, `phone`) **todos** permitem merge → o merge
+    dispara.
+  </Step>
+  <Step title="Funde tudo no vencedor">
+    Os perfis A e B são fundidos no C: os identificadores são repontados para o C e os traits
+    são consolidados. O `device_id` novo é anexado ao C.
+  </Step>
+  <Step title="Resultado">
+    Um único **Perfil C** com `external_id`, `email`, `phone`, `device_id` e os dados
+    consolidados. A e B deixam de existir como perfis separados.
+  </Step>
+</Steps>
+
+<Warning>
+  Se **um** dos tipos que casaram tivesse "Permitir merge" **desligado** (por exemplo o
+  `email`), nada seria fundido: o evento iria para a **Quarentena** como conflito, e os perfis
+  ficariam separados até você revisar. É uma trava proposital pra você não fundir perfis sem
+  querer.
+</Warning>
+
+## Configurar as identidades do seu negócio
+
+Um roteiro prático, na ordem que costuma funcionar:
+
+<Steps>
+  <Step title="Deixe os primeiros eventos chegarem">
+    Os tipos aparecem sozinhos como rascunho e os eventos vão para a quarentena — isso é o
+    "aquecimento" esperado, não um erro.
+  </Step>
+  <Step title="Abra cada card e salve">
+    Isso marca o tipo como configurado e libera a quarentena. Depois, reprocesse os eventos que
+    ficaram parados.
+  </Step>
+  <Step title="Marque 'Único' com cuidado">
+    Ligue **Único** nos identificadores que apontam para **uma pessoa** (`external_id`, `email`,
+    `phone`). Deixe **não-único** o que é compartilhável (`device_id`, cookie) — senão você
+    juntaria pessoas diferentes que usaram o mesmo aparelho.
+  </Step>
+  <Step title="Defina a força por confiabilidade">
+    O identificador mais estável (ID de login) recebe força 5; e-mail e telefone, 3–4; sinais
+    fracos, 1–2. É o que decide o vencedor num conflito.
+  </Step>
+  <Step title="Escolha 'Permitir merge' com critério">
+    Ligue só nos identificadores em que você confia para fundir perfis automaticamente. Deixar
+    um tipo conservador sem merge força a revisão manual via quarentena.
+  </Step>
+  <Step title="Ajuste a normalização e desabilite o que não usa">
+    E-mail → minúsculo; telefone → E.164; documento → só dígitos. Tipos que você não quer
+    resolver podem ficar **desabilitados** (não apaga dados, só ignora).
+  </Step>
+</Steps>
+
+## Bom saber
+
+<CardGroup cols={1}>
+  <Card title="Tipos nascem como rascunho e barram eventos até você configurar" icon="seedling">
+    Você vai "descobrir" tipos que nunca criou. Enquanto não forem salvos, os eventos que
+    dependem deles ficam na quarentena de propósito.
+  </Card>
+  <Card title="Configurar é definitivo" icon="lock">
+    Uma vez salvo, o tipo nunca volta a ser rascunho — reabrir e salvar de novo só atualiza a
+    configuração.
+  </Card>
+  <Card title="Só identidades 'Único' deduplicam perfis" icon="fingerprint">
+    Um tipo não-único nunca casa um evento a um perfil sozinho — ele serve de sinal extra, não
+    de âncora.
+  </Card>
+  <Card title="Merge exige unanimidade" icon="arrows-to-circle">
+    O merge automático só roda se **todos** os tipos que casaram permitirem. Um único tipo
+    conservador segura tudo na quarentena.
+  </Card>
+  <Card title="Desabilitar não apaga" icon="power-off">
+    Desligar um tipo só faz o resolver pular os valores dele — as identidades já existentes
+    continuam no lugar.
+  </Card>
+</CardGroup>
