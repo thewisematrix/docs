@@ -1,0 +1,65 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "PrismaFlow",
+  "description": "Documentação oficial do PrismaFlow — guia de uso e integração.",
+  "colors": {
+    "primary": "#6950E8",
+    "light": "#8C8DFF",
+    "dark": "#6950E8"
+  },
+  "appearance": {
+    "default": "dark",
+    "strict": true
+  },
+  "background": {
+    "color": {
+      "dark": "#111827"
+    }
+  },
+  "styling": {
+    "codeblocks": "dark"
+  },
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/icon.svg",
+    "dark": "/logo/icon.svg"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Comece aqui",
+        "groups": [
+          {
+            "group": "Tópicos",
+            "pages": [
+              "index",
+              {
+                "group": "Eventos",
+                "pages": [
+                  "eventos/definicoes",
+                  "eventos/computed-traits",
+                  "eventos/identidades",
+                  "eventos/quarentena"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://dashboard.prismacdp.com"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/prismaflow",
+      "x": "https://x.com/prismaflow"
+    }
+  }
+}

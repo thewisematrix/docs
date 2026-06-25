@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="38 34 494 132" font-family="Poppins, 'Segoe UI', sans-serif">
+  <g transform="translate(24,28) scale(0.6)">
+<path d="M119.03,16.84 L36.77,120.84 L118.71,155.29 Z" fill="#8C8DFF"/><path d="M120.97,16.84 L203.23,120.84 L121.29,155.29 Z" fill="#6950E8"/><path d="M36.41,135.79 L117.08,170.68 L118.49,223.41 Z" fill="#6950E8"/><path d="M203.59,135.79 L122.92,170.68 L121.51,223.41 Z" fill="#5240BA"/>
+</g>
+  <text x="188" y="122" font-size="58" font-weight="600" letter-spacing="-1.5"><tspan fill="#111827">Prisma</tspan><tspan fill="#6950E8">Flow</tspan></text>
+</svg>

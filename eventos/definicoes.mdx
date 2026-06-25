@@ -1,0 +1,220 @@
+---
+title: "Definições"
+description: "O molde de cada tipo de evento: quais campos ele tem, como são validados e o que vira característica do perfil."
+---
+
+Uma **definição de evento** é o _molde_ de um tipo de evento que o seu sistema envia para o
+PrismaFlow — por exemplo, uma compra (`Purchase`), um cadastro ou um login.
+
+Esse molde diz ao PrismaFlow quatro coisas: **quais informações** o evento carrega (os campos),
+**de que tipo** é cada uma, **o que fazer** quando chega algo fora do molde, e **quais campos**
+viram características da pessoa (os _traits_ do perfil).
+
+<Note>
+  Pense no molde como a ficha de um formulário. Depois que ele está definido, todo evento daquele
+  tipo é conferido contra a ficha antes de entrar.
+</Note>
+
+## As peças de uma definição
+
+<CardGroup cols={2}>
+  <Card title="Nome e versão" icon="fingerprint">
+    O nome identifica o tipo de evento (ex.: `Purchase`). A versão é controlada pelo PrismaFlow —
+    você não precisa se preocupar com ela.
+  </Card>
+  <Card title="Campos (propriedades)" icon="list">
+    A lista de informações que o evento carrega e o tipo de cada uma (texto, número, data, lista…).
+  </Card>
+  <Card title="Modo de validação" icon="shield-check">
+    Define o que acontece quando um evento chega com campos que não estão no molde.
+  </Card>
+  <Card title="Trait mappings" icon="user-tag">
+    Regras que pegam um campo do evento e o gravam como característica no perfil da pessoa.
+  </Card>
+</CardGroup>
+
+## Onde encontrar
+
+As definições ficam na aba **Definições**, dentro de **Eventos**. Cada definição aparece como um
+cartão, mostrando o modo de validação, a versão e quando foi criada.
+
+<Frame caption="A lista de definições. Use 'Nova definição' para criar; cada cartão pode ser ativado/desativado e editado.">
+  <img src="/images/anotadas/event-def-list-and-create.png?v=2" alt="Lista de definições de evento com o botão Nova definição em destaque" />
+</Frame>
+
+## Criar uma definição
+
+<Steps>
+  <Step title="Abra o criador">
+    Na aba **Definições**, clique em **Nova definição** (canto superior direito).
+  </Step>
+
+  <Step title="Defina os campos do evento">
+    Aqui você descreve quais informações o evento carrega. Há dois caminhos:
+
+    <Frame caption="Tela inicial dos campos: importe um exemplo ou crie campo a campo.">
+      <img src="/images/anotadas/create-event-empty-screen.png?v=2" alt="Tela vazia de propriedades com as opções Importar JSON e Criar manualmente" />
+    </Frame>
+
+    <Tabs>
+      <Tab title="Importar JSON (mais rápido)">
+        Cole um exemplo real do evento e o PrismaFlow **descobre os campos e os tipos sozinho**.
+
+        <Frame caption="Cole um evento de exemplo; os tipos são inferidos automaticamente.">
+          <img src="/images/anotadas/import-json-modal.png?v=2" alt="Modal Importar JSON com um payload de exemplo" />
+        </Frame>
+
+        <Tip>
+          A detecção automática marca todo número como `number`. Se algum campo precisa ser
+          **inteiro** (`integer`), ajuste o tipo manualmente depois de importar.
+        </Tip>
+      </Tab>
+
+      <Tab title="Criar manualmente">
+        Adicione um campo de cada vez: escolha o **tipo**, dê um **nome** e marque se ele é
+        **obrigatório**. Em listas (`array`), você ainda escolhe o subtipo dos itens.
+
+        <Frame caption="Cada linha é um campo: tipo, nome e se é obrigatório.">
+          <img src="/images/anotadas/event-fields-config.png?v=2" alt="Configuração de campos com tipo, nome e obrigatório" />
+        </Frame>
+      </Tab>
+    </Tabs>
+
+    Os tipos de campo disponíveis:
+
+    <Frame caption="Os sete tipos de campo.">
+      <img src="/images/anotadas/event-field-types.png?v=2" alt="Lista de tipos: string, number, integer, boolean, date, array, object" />
+    </Frame>
+
+    | Tipo | O que é | Exemplo |
+    | --- | --- | --- |
+    | `string` | Texto | `"abc123"` |
+    | `number` | Qualquer número, inclusive com casas decimais | `12.5` |
+    | `integer` | Apenas número inteiro, sem casas decimais | `42` |
+    | `boolean` | Verdadeiro ou falso | `true` |
+    | `date` | Uma data ou data com hora | `2026-04-20T10:00:00Z` |
+    | `array` | Uma lista de valores (você escolhe o subtipo) | `["shirt", "pants"]` |
+    | `object` | Um grupo de campos dentro do campo | `{ "rua": "...", "cep": "..." }` |
+
+    <Note>
+      **`number` ou `integer`?** Use `number` quando o valor pode ter vírgula (preço, peso). Use
+      `integer` só quando o valor é sempre inteiro (quantidade, idade). Na dúvida, `number` aceita
+      os dois. Um valor como `12.5` enviado num campo `integer` é recusado.
+    </Note>
+
+    <Note>
+      **Campos `date`** aceitam tanto uma data (`2026-04-20`) quanto uma data com hora. O PrismaFlow
+      padroniza o valor automaticamente, então você não precisa se preocupar com o formato exato.
+    </Note>
+  </Step>
+
+  <Step title="(Opcional) Promova campos a características do perfil">
+    Um **trait mapping** pega um campo do evento e o grava como uma característica (_trait_) no
+    perfil da pessoa. Exemplo: o campo `amount` da compra vira o trait `last_purchase_amount` no
+    perfil.
+
+    <Frame caption="Cada evento atualiza os traits do perfil; o valor mais recente sempre vence.">
+      <img src="/images/anotadas/trait-mapping-empty.png?v=2" alt="Tela de trait mapping vazia com o aviso sobre o valor mais recente" />
+    </Frame>
+
+    Para criar, escolha **de qual campo** vem o valor, **qual trait** ele alimenta e o **tipo** do
+    valor.
+
+    <Frame caption="Novo trait mapping: campo de origem, trait de destino e tipo.">
+      <img src="/images/anotadas/trait-mapping-config.png?v=2" alt="Modal de novo trait mapping" />
+    </Frame>
+
+    <Frame caption="Os mapeamentos criados: campo do evento → trait do perfil.">
+      <img src="/images/anotadas/trait-mapping-list.png?v=2" alt="Lista de trait mappings" />
+    </Frame>
+
+    <Info>
+      **O valor mais recente sempre vence.** A cada novo evento, o trait é atualizado com o valor
+      que chegou — o anterior é sobrescrito. Para cálculos que somam, contam ou fazem médias ao
+      longo do tempo, use os [Computed Traits](/eventos/computed-traits).
+    </Info>
+
+    <Note>
+      O trait mapping só passa a valer **dos próximos eventos em diante** — ele não recalcula o
+      histórico já recebido. E você só consegue promover um campo que **existe no molde** (por isso
+      "Campo do schema" é uma lista, não um texto livre).
+    </Note>
+  </Step>
+
+  <Step title="Dê um nome e escolha o modo de validação">
+    Por fim, informe o **nome** do evento, uma **descrição** e **tags** opcionais, e escolha o
+    **modo de validação**.
+
+    <Frame caption="Configuração geral: nome, descrição, tags e modo de validação.">
+      <img src="/images/anotadas/event-def-general-config.png?v=3" alt="Configuração geral da definição com o modo de validação" />
+    </Frame>
+
+    <CardGroup cols={2}>
+      <Card title="Estrito (recomendado)" icon="lock">
+        Eventos que trazem campos fora do molde são recusados e enviados para a **Quarentena**.
+        Mantém seus dados limpos.
+      </Card>
+      <Card title="Permissivo" icon="lock-open">
+        Campos extras passam pela validação. Apenas os campos obrigatórios são conferidos.
+      </Card>
+    </CardGroup>
+
+    <Warning>
+      No modo **Estrito**, um evento com campo a mais **não some e não retorna erro** para o seu
+      sistema — ele é desviado para a aba [Quarentena](/eventos/quarentena), onde você pode revisar
+      o motivo. Vale a pena dar uma olhada lá de tempos em tempos.
+    </Warning>
+  </Step>
+
+  <Step title="Criar definição">
+    Clique em **Criar definição**. Pronto — a partir daí, todo evento daquele tipo passa a ser
+    conferido contra o molde.
+  </Step>
+</Steps>
+
+## Editar uma definição
+
+Você pode editar uma definição existente a qualquer momento. Enquanto as mudanças são
+**compatíveis** (como adicionar um campo opcional, mexer na descrição ou nas tags), elas são
+salvas direto.
+
+Mas algumas mudanças são **quebras** (_breaking changes_): elas fariam eventos que já funcionavam
+passar a falhar. Quando o PrismaFlow detecta uma quebra, ele **não deixa sobrescrever a versão
+atual** — é obrigatório **criar uma nova versão**. Assim, tudo que já estava rodando continua
+intacto na versão antiga.
+
+<Frame caption="Ao detectar uma quebra, o PrismaFlow exige criar uma nova versão e mostra exatamente o que mudou.">
+  <img src="/images/anotadas/event-def-breaking-change.png?v=1" alt="Modal Mudanças detectadas com uma quebra e o botão Criar nova versão" />
+</Frame>
+
+O aviso lista cada quebra, explica **por que** ela quebra e sugere **como evitá-la** — no exemplo,
+tornar o campo opcional em vez de obrigatório. Mudanças que contam como quebra incluem:
+
+- Trocar o modo de validação de **Permissivo para Estrito** — eventos com campos extras, que antes
+  passavam, passariam a ser recusados.
+- **Adicionar um novo campo obrigatório** — eventos antigos que não enviam esse campo falhariam na
+  validação.
+
+<Warning>
+  Criar a nova versão **não apaga** a anterior: as versões antigas continuam ativas para os eventos
+  que as usam. Como Computed Traits, segmentos e jornadas podem depender do schema, vale revisá-los
+  depois de versionar.
+</Warning>
+
+## Bom saber
+
+<CardGroup cols={1}>
+  <Card title="Criar com um nome que já existe cria uma nova versão" icon="layer-group">
+    Se você criar uma definição com um nome que já existe, o PrismaFlow **não substitui** a
+    anterior — ele cria uma nova versão (v2, v3…). As versões antigas continuam valendo para os
+    eventos que as usam. Isso evita que uma mudança quebre o que já estava funcionando.
+  </Card>
+  <Card title="O nome do evento tem regras" icon="font">
+    O nome deve **começar com uma letra** (acentos são aceitos) e pode conter letras, números, `_`
+    e `-`, com no máximo 100 caracteres. O próprio formulário mostra essa dica abaixo do campo.
+  </Card>
+  <Card title="Marcar um campo como obrigatório muda a validação" icon="asterisk">
+    Campos obrigatórios precisam estar presentes em todo evento. Campos não obrigatórios podem
+    faltar — nesse caso, o evento ainda é aceito.
+  </Card>
+</CardGroup>
