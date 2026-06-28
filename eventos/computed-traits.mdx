@@ -1,8 +1,217 @@
 ---
-title: "Computed traits"
-description: "Traços computados a partir de eventos e identidades."
+title: "Computed Traits"
+icon: "calculator"
+description: "Regras que calculam características do perfil automaticamente a partir dos eventos — somar, contar, média, máximo, último valor e mais."
 ---
 
+Um **computed trait** é uma característica do perfil que o PrismaFlow **calcula sozinho** a partir
+dos eventos, seguindo uma regra que você define. Por exemplo: _toda vez que chega uma compra
+(`Purchase`), atualize o trait `last_purchase_amount` com o valor da compra_.
+
 <Note>
-  Página em construção. Vamos escrever este tema juntos no próximo passo.
+  Lembra do **trait mapping** lá em [Definições](/eventos/definicoes)? Ele faz uma **cópia direta**
+  de um campo do evento para um trait (o valor mais recente vence). O **computed trait** vai além:
+  ele aplica **lógica de cálculo** — somar, contar, tirar média, guardar o maior, juntar numa
+  lista. Use trait mapping para copiar; use computed trait para calcular.
 </Note>
+
+## A aba Computed Traits
+
+As regras ficam na aba **Computed Traits**, dentro de **Eventos**.
+
+<Frame caption="Cada regra mostra o nome, se está ativa, a prioridade e o trait que ela alimenta. Ações: ativar/desativar, reprocessar, editar e excluir.">
+  <img src="/images/anotadas/ct-list.png?v=1" alt="Lista de regras de computed traits" />
+</Frame>
+
+Cada cartão é uma regra: o **nome**, o selo **Ativa/Desativada**, a **Prioridade**, o **trait**
+que ela alimenta e quando foi atualizada. Nas ações, da esquerda para a direita: o **interruptor**
+ativa/desativa a regra, o ícone de **setas circulares (↻) reprocessa**, o **lápis edita** e a
+**lixeira exclui**. Em cima, você pode filtrar por evento e mostrar **apenas as habilitadas**.
+
+## Como uma regra é montada
+
+Uma regra é um **fluxo de nós**, da esquerda para a direita: **Evento gatilho → (Filtro opcional)
+→ Operação → Trait alvo**.
+
+<Frame caption="O fluxo de uma regra: o evento que dispara, como o valor é calculado e qual trait recebe o resultado.">
+  <img src="/images/anotadas/criar-ct-fluxo-completo.png?v=1" alt="Canvas com os nós Evento gatilho, Operação e Trait alvo" />
+</Frame>
+
+## Criar uma regra
+
+Clique em **Nova regra** e monte o fluxo, nó por nó:
+
+<Steps>
+  <Step title="Evento gatilho — o que dispara a regra">
+    Escolha o **evento** e a **versão** que disparam a regra. Ela vai rodar toda vez que esse
+    evento chegar. (Só aparecem eventos que já têm [definição](/eventos/definicoes) ativa.)
+
+    <Frame caption="Escolha o evento e a versão que disparam a regra.">
+      <img src="/images/anotadas/criar-ct-gatilho.png?v=1" alt="Modal Escolher evento" />
+    </Frame>
+  </Step>
+
+  <Step title="(Opcional) Filtro — quando aplicar">
+    Depois do gatilho, clique no **+** para adicionar um **Filtro** ou ir direto para a
+    **Operação**.
+
+    <Frame caption="Após cada nó, escolha adicionar um Filtro ou uma Operação.">
+      <img src="/images/anotadas/criar-ct-node-apos-gatilho.png?v=1" alt="Menu Adicionar próximo node com as opções Filtro e Operação" />
+    </Frame>
+
+    No filtro, você define **condições** que o evento precisa atender (campo, operador e valor).
+    **Todas as condições precisam ser verdadeiras** (é um "E"). Deixe vazio para aceitar todos os
+    eventos.
+
+    <Frame caption="Cada condição é um campo, um operador e um valor. Adicione quantas precisar.">
+      <img src="/images/anotadas/criar-ct-filtro.png?v=1" alt="Modal Configurar filtro" />
+    </Frame>
+
+    <Note>
+      Não existe "OU" dentro de uma regra. Para simular um "OU", crie **duas regras** com a mesma
+      operação e prioridade, mudando só o filtro.
+    </Note>
+  </Step>
+
+  <Step title="Operação — como calcular o valor">
+    A operação define **o que fazer com o valor**. O valor pode ser uma **Constante** (um valor
+    fixo, ex.: somar `1` a cada compra) ou um **Caminho do evento** (um valor de dentro do evento,
+    ex.: `$.properties.amount`).
+
+    <Frame caption="Escolha a operação e diga de onde vem o valor: uma constante fixa ou um caminho do evento.">
+      <img src="/images/anotadas/criar-ct-operacao.png?v=1" alt="Modal Configurar operação com as opções Constante e Caminho do evento" />
+    </Frame>
+
+    As operações disponíveis:
+
+    | Operação | O que faz | Exemplo de uso |
+    | --- | --- | --- |
+    | **Definir valor** | Sobrescreve sempre com o novo valor. | `last_purchase_amount` = valor da última compra |
+    | **Último** | Mantém o valor mais recente (igual a Definir). | última cidade vista |
+    | **Primeiro** | Guarda o primeiro valor e nunca mais muda. | primeira origem de cadastro |
+    | **Máximo** | Mantém o maior valor visto. | maior compra |
+    | **Mínimo** | Mantém o menor valor visto. | primeiro preço pago |
+    | **Incrementar** | Soma ao valor atual. | total gasto, ou contador de compras (constante `1`) |
+    | **Média** | Calcula a média ao longo do tempo. | ticket médio |
+    | **Colecionar** | Junta numa lista, sem repetir (até 200 itens). | produtos já comprados |
+  </Step>
+
+  <Step title="Trait alvo — qual trait recebe o valor">
+    Informe a **chave do trait** (em `snake_case`, ex.: `last_purchase_amount`) e o **tipo** do
+    valor. O tipo é sugerido automaticamente pela operação, mas você pode ajustar.
+
+    <Frame caption="O trait que recebe o resultado: a chave (snake_case) e o tipo do valor.">
+      <img src="/images/anotadas/criar-ct-def-trait-campo.png?v=1" alt="Modal Definir trait alvo" />
+    </Frame>
+  </Step>
+
+  <Step title="Criar regra">
+    Clique em **Criar regra** no canvas. A partir daí, todo evento gatilho passa a atualizar o
+    trait automaticamente.
+  </Step>
+</Steps>
+
+## Cuidado: o filtro não escreve `false`
+
+Esse é o detalhe que mais pega as pessoas. Um filtro **não devolve "verdadeiro ou falso"** — ele
+funciona como uma **portaria**: se o evento **passa** na condição, o fluxo continua e a operação
+roda; se **não passa**, a regra inteira é **ignorada** e o trait **fica exatamente como estava**.
+
+A consequência: uma regra com filtro que **define um valor** cria uma **flag "grudenta"** — uma
+vez escrita, ela não volta atrás sozinha.
+
+### Exemplo: "o cliente pagou com PIX?"
+
+Imagine esta regra:
+
+- **Gatilho:** `Purchase`
+- **Filtro:** `payment_method` **é** `pix`
+- **Operação:** Definir valor `true`
+- **Trait alvo:** `paid_with_pix`
+
+Veja o que acontece conforme as compras chegam:
+
+| Compra | Passa no filtro? | O que acontece com `paid_with_pix` |
+| --- | --- | --- |
+| via **PIX** | Sim | vira `true` |
+| via **cartão** | Não | **continua `true`** (a regra é ignorada) |
+| via **boleto** | Não | **continua `true`** |
+
+Ou seja: assim que rola **uma** compra via PIX, o trait vira `true` e **fica `true` para sempre** —
+mesmo que todas as compras seguintes sejam no cartão. Se a sua intenção era "**já pagou com PIX
+alguma vez?**", está perfeito. Mas se você queria "**o último pagamento foi via PIX?**", está
+errado.
+
+### Como corrigir: uma segunda regra que faz o oposto
+
+Para um flag que **reflete o último evento**, crie **duas regras** apontando para o mesmo trait —
+uma para cada caso:
+
+| | Regra 1 | Regra 2 |
+| --- | --- | --- |
+| **Filtro** | `payment_method` **é** `pix` | `payment_method` **não é** `pix` |
+| **Operação** | Definir valor `true` | Definir valor `false` |
+| **Trait alvo** | `paid_with_pix` | `paid_with_pix` |
+
+Agora cada compra cai em **exatamente uma** das regras: PIX vira `true`, qualquer outro método vira
+`false`. O trait passa a refletir sempre o **último** pagamento.
+
+<Warning>
+  Sempre que um trait booleano vier de uma regra **com filtro**, pergunte-se: "e quando o filtro
+  **não** passar?". Se o valor precisa **voltar atrás**, você precisa da regra oposta para escrever
+  o outro caso.
+</Warning>
+
+## Prioridade: quando duas regras disputam o mesmo trait
+
+Várias regras podem alimentar o **mesmo trait**. Se, no mesmo evento, mais de uma regra quiser
+escrever no mesmo trait, vence a de **maior prioridade** (número maior = mais importante). Em
+empate, o desempate é automático e sempre dá o mesmo resultado. A prioridade aparece como um selo
+no cartão da regra.
+
+## Reprocessar (aplicar ao histórico)
+
+Uma regra nova ou alterada vale **só dos próximos eventos em diante** — ela não recalcula o
+passado sozinha. Para aplicar a eventos antigos, clique em **Reprocessar (↻)** na regra.
+
+<Frame caption="Reprocessar: escolha a janela de tempo (ou um atalho) e inicie. A engine relê os eventos do período e reaplica a regra.">
+  <img src="/images/anotadas/reprocessar-ct-rule.png?v=1" alt="Modal Reprocessar com janela de tempo e atalhos 7d/30d/90d/180d" />
+</Frame>
+
+Escolha a **janela** (Início e Fim, ou os atalhos **7d / 30d / 90d / 180d**), um **motivo
+opcional**, e clique em **Iniciar reprocessamento**. A engine relê os eventos daquele período e
+reaplica a regra.
+
+<Note>
+  O reprocessamento é **seguro contra dupla contagem**: mesmo em operações que somam ou tiram
+  média, um evento não é contado duas vezes. A janela máxima é de cerca de 10 meses.
+</Note>
+
+<Warning>
+  **Reprocessar mexe no resto da plataforma.** Cada trait recalculado **emite um sinal de
+  atualização** — e isso pode **acionar segmentos e jornadas** que dependem daquele trait. Um
+  reprocessamento grande pode disparar **muitas jornadas de uma vez** (e-mails, automações,
+  webhooks…). Reprocesse com cautela: comece por uma **janela pequena**, confira o impacto, e só
+  então amplie o período.
+</Warning>
+
+## Bom saber
+
+<CardGroup cols={1}>
+  <Card title="Trait mapping copia, computed trait calcula" icon="calculator">
+    Se você só precisa copiar um campo do evento para o perfil, o trait mapping (em Definições)
+    resolve. Para somar, contar, médias, máximos ou listas, use um computed trait.
+  </Card>
+  <Card title="Mudanças valem dos próximos eventos em diante" icon="clock">
+    Criar ou alterar uma regra não mexe no histórico. Use **Reprocessar** para aplicar a eventos
+    passados.
+  </Card>
+  <Card title="Se o valor não vier, a regra é pulada em silêncio" icon="circle-minus">
+    Se o campo apontado não existe no evento, ou o valor não bate com o tipo do trait, a regra
+    simplesmente não roda para aquele evento — sem erro.
+  </Card>
+  <Card title="O trait calculado alimenta o resto da plataforma" icon="share-nodes">
+    Quando um computed trait muda, ele atualiza o perfil, e passa a valer para **segmentos** (no
+    próximo recálculo) e **jornadas** que dependem daquele trait.
+  </Card>
+</CardGroup>

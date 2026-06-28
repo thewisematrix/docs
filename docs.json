@@ -31,18 +31,18 @@
         "tab": "Comece aqui",
         "groups": [
           {
-            "group": "Tópicos",
+            "group": "Início",
             "pages": [
-              "index",
-              {
-                "group": "Eventos",
-                "pages": [
-                  "eventos/definicoes",
-                  "eventos/computed-traits",
-                  "eventos/identidades",
-                  "eventos/quarentena"
-                ]
-              }
+              "index"
+            ]
+          },
+          {
+            "group": "Eventos",
+            "pages": [
+              "eventos/definicoes",
+              "eventos/computed-traits",
+              "eventos/identidades",
+              "eventos/quarentena"
             ]
           }
         ]
