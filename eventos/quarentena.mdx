@@ -1,8 +1,103 @@
 ---
 title: "Quarentena"
-description: "Eventos em quarentena: o que são e como tratá-los."
+description: "A rede de segurança do PrismaFlow: eventos que não puderam ser aceitos ficam guardados aqui, com o motivo, para você revisar e reprocessar — sem perder nada."
 ---
 
+Nem todo evento pode ser aceito na hora em que chega. Às vezes falta a definição, o formato
+veio errado, é uma duplicata, ou um tipo de identidade ainda não foi configurado. Quando isso
+acontece, o PrismaFlow **não descarta o evento e não devolve erro pro seu sistema** — ele guarda
+o evento inteiro na **Quarentena**, junto com o motivo, pra você revisar e reprocessar.
+
 <Note>
-  Página em construção. Vamos escrever este tema juntos no próximo passo.
+  Pense na quarentena como uma **sala de espera com rede de segurança**: nada se perde. O evento
+  fica guardado exatamente como chegou até você resolver a causa e reprocessá-lo.
 </Note>
+
+## A aba Quarentena
+
+Os eventos barrados ficam na aba **Quarentena**, dentro de **Eventos**. Cada linha é um evento
+que não entrou.
+
+<Frame caption="Cada linha mostra o evento, o motivo, nº de erros, tamanho, quando chegou e as ações (reprocessar e ver detalhes). Em cima: busca, filtro por motivo e período, e Exportar.">
+  <img src="/images/anotadas/listagem-de-eventos-em-quarentena.png?v=1" alt="Aba Quarentena com a lista de eventos barrados e seus motivos" />
+</Frame>
+
+As colunas são: **Evento** (nome + versão), **Motivo**, **Erros** (quantos problemas o schema
+apontou), **Tamanho**, **Recebido em** e **Ações**. Na coluna de ações, o ícone de **setas
+circulares (↻) reprocessa** o evento e o ícone de **olho (👁) abre os detalhes**. Você pode
+filtrar por **motivo** e por **período**, e **exportar** a lista.
+
+## Os motivos da quarentena
+
+Todo evento barrado cai em um destes motivos:
+
+| Motivo | O que significa | Como resolver |
+| --- | --- | --- |
+| **Envelope inválido** | O formato do evento veio quebrado (estrutura/JSON malformado). | Corrija o que o seu sistema está enviando. |
+| **Definição não encontrada** | Não existe uma [definição](/eventos/definicoes) para esse evento e versão. | Crie a definição (ou confira se o nome/versão batem). |
+| **Definição desabilitada** | A definição existe, mas está desativada. | Reative a definição ou ajuste o evento. |
+| **Validação falhou** | O evento não bate com o schema (campo faltando, tipo errado). | Ajuste o schema ou corrija a origem do dado. |
+| **Propriedade desconhecida** | Veio um campo a mais que o modo **Estrito** não aceita. | Adicione o campo ao schema ou use o modo Permissivo. |
+| **Evento duplicado** | O mesmo evento chegou de novo dentro da janela de ~1 hora. | Normalmente não precisa de ação — é proteção contra duplicatas. |
+| **Identidade pendente** | Um tipo de [identidade](/eventos/identidades) do evento ainda não foi configurado. | Abra o card da identidade e salve a configuração. |
+
+## Ver os detalhes de um evento
+
+Clique no ícone de olho (👁) de uma linha para abrir os detalhes.
+
+<Frame caption="Detalhes do evento: contexto, o motivo com os erros exatos (campo + problema) e o payload original. Botão Reprocessar no rodapé.">
+  <img src="/images/anotadas/detalhes-de-um-evento-em-quarentena.png?v=1" alt="Modal de detalhes de um evento em quarentena" />
+</Frame>
+
+O painel tem três partes:
+
+- **Contexto** — quando o evento chegou, o tamanho do payload e o **Correlation ID** (um código
+  para rastrear esse evento nos seus logs).
+- **Motivo** — a explicação do que houve e, quando aplicável, a **lista exata dos erros**: o
+  campo e o problema (por exemplo, `$.items[0].price` → `must be number`, ou `$.customer_id` →
+  `is required`). Há também o atalho **Editar schema**, que leva direto à definição para corrigir.
+- **Payload** — o **evento original, intacto**, do jeitinho que chegou.
+
+## Reprocessar
+
+Depois de **resolver a causa** (criar/corrigir a definição, configurar a identidade, etc.),
+clique em **Reprocessar** — no rodapé dos detalhes ou no ícone ↻ da linha. O evento volta para o
+fluxo normal como se tivesse acabado de chegar (ganha um novo identificador interno, mas mantém o
+mesmo Correlation ID para rastreio).
+
+<Warning>
+  Reprocessar **não conserta nada sozinho** — ele só reenvia o evento ao fluxo. Se a causa ainda
+  não foi resolvida, o evento **volta para a quarentena** como um novo registro. Corrija primeiro,
+  reprocesse depois.
+</Warning>
+
+<Note>
+  Eventos reprocessados **somem da lista** — ela mostra apenas os que ainda estão pendentes. Se
+  você reprocessou e o evento não voltou, deu certo.
+</Note>
+
+## Exportar
+
+O botão **Exportar** baixa a lista (respeitando os filtros ativos) em **CSV ou JSON**, até 1.000
+linhas. O CSV traz recebido em, evento, versão, motivo, correlation ID, tamanho e um resumo do
+erro — o payload completo não entra no CSV (mas está sempre nos detalhes de cada evento).
+
+## Bom saber
+
+<CardGroup cols={1}>
+  <Card title="Zero perda de dados" icon="shield-check">
+    Um evento barrado nunca é descartado nem some — ele fica guardado inteiro até você decidir o
+    que fazer.
+  </Card>
+  <Card title="A lista mostra só os pendentes" icon="list-check">
+    Assim que um evento é reprocessado, ele sai da lista. O que você vê são os que ainda precisam
+    de atenção.
+  </Card>
+  <Card title="'Identidade pendente' aparece um pouco depois" icon="clock">
+    Esse motivo é detectado numa etapa posterior (não no instante do envio), então o evento pode
+    levar um tempinho até aparecer aqui.
+  </Card>
+  <Card title="Corrija a causa antes de reprocessar" icon="wrench">
+    Reprocessar sem resolver o motivo só faz o evento voltar para a quarentena.
+  </Card>
+</CardGroup>
