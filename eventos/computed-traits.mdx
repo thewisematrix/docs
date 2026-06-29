@@ -43,8 +43,10 @@ Clique em **Nova regra** e monte o fluxo, nó por nó:
 
 <Steps>
   <Step title="Evento gatilho — o que dispara a regra">
-    Escolha o **evento** e a **versão** que disparam a regra. Ela vai rodar toda vez que esse
-    evento chegar. (Só aparecem eventos que já têm [definição](/eventos/definicoes) ativa.)
+    A regra observa **um** tipo de evento numa versão específica — por exemplo, `Purchase@1`. Toda
+    vez que esse evento chega e é atribuído a um perfil, a regra roda para aquele perfil; eventos de
+    outros tipos ou versões são ignorados por ela. Só aparecem eventos que já têm
+    [definição](/eventos/definicoes) ativa.
 
     <Frame caption="Escolha o evento e a versão que disparam a regra.">
       <img src="/images/anotadas/criar-ct-gatilho.png?v=1" alt="Modal Escolher evento" />
@@ -59,9 +61,12 @@ Clique em **Nova regra** e monte o fluxo, nó por nó:
       <img src="/images/anotadas/criar-ct-node-apos-gatilho.png?v=1" alt="Menu Adicionar próximo node com as opções Filtro e Operação" />
     </Frame>
 
-    No filtro, você define **condições** que o evento precisa atender (campo, operador e valor).
-    **Todas as condições precisam ser verdadeiras** (é um "E"). Deixe vazio para aceitar todos os
-    eventos.
+    No filtro, cada condição tem um **campo** do evento (ex.: `properties.payment_method`), um
+    **operador** (**é**, **não é**, **maior/menor que**, **está em**, **contém**, **existe**) e um
+    **valor**. **Todas** as condições precisam ser verdadeiras (um "E"). Deixe o filtro **vazio**
+    para a regra valer para todos os eventos do gatilho.
+
+    Exemplo: para contar só as compras pagas, filtre `properties.status` **é** `paid`.
 
     <Frame caption="Cada condição é um campo, um operador e um valor. Adicione quantas precisar.">
       <img src="/images/anotadas/criar-ct-filtro.png?v=1" alt="Modal Configurar filtro" />
@@ -94,11 +99,22 @@ Clique em **Nova regra** e monte o fluxo, nó por nó:
     | **Incrementar** | Soma ao valor atual. | total gasto, ou contador de compras (constante `1`) |
     | **Média** | Calcula a média ao longo do tempo. | ticket médio |
     | **Colecionar** | Junta numa lista, sem repetir (até 200 itens). | produtos já comprados |
+
+    De onde vem o valor muda entre **Constante** e **Caminho do evento**: a constante é um valor
+    fixo (combina com **Incrementar 1** para contadores, ou **Definir** uma flag); o caminho puxa um
+    valor de dentro do evento, como `$.properties.amount` (combina com somas, médias e máximos). As
+    operações que acumulam (**Incrementar** e **Média**) contam cada evento **uma única vez** — mesmo
+    em reprocessamento, sem dupla contagem.
   </Step>
 
   <Step title="Trait alvo — qual trait recebe o valor">
-    Informe a **chave do trait** (em `snake_case`, ex.: `last_purchase_amount`) e o **tipo** do
-    valor. O tipo é sugerido automaticamente pela operação, mas você pode ajustar.
+    A **chave** identifica o trait no perfil (em `snake_case`, ex.: `total_compras`). O **tipo**
+    (texto, número, booleano, data ou lista) é sugerido pela operação, mas você pode trocar — por
+    exemplo, forçar **número** se o valor chegar como texto. Se o valor não couber no tipo, a regra
+    é **pulada** para aquele evento, sem erro.
+
+    Mais de uma regra pode alimentar o **mesmo trait**; nesse caso, a **prioridade** decide quem
+    vence (veja abaixo).
 
     <Frame caption="O trait que recebe o resultado: a chave (snake_case) e o tipo do valor.">
       <img src="/images/anotadas/criar-ct-def-trait-campo.png?v=1" alt="Modal Definir trait alvo" />
