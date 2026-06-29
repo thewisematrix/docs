@@ -74,6 +74,22 @@
                 ]
               }
             ]
+          },
+          {
+            "group": "Integrações",
+            "pages": [
+              {
+                "group": "Provedores",
+                "icon": "plug",
+                "root": "integracoes/provedores",
+                "expanded": true,
+                "pages": [
+                  "integracoes/onesignal",
+                  "integracoes/webhook"
+                ]
+              },
+              "integracoes/templates"
+            ]
           }
         ]
       }

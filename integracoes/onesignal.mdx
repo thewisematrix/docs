@@ -1,0 +1,83 @@
+---
+title: "OneSignal"
+description: "Credencial de push (OneSignal): os campos da aba Configuração (chave de API, App ID, idiomas, segredo de assinatura), o mapeamento do destinatário, a validação e os eventos de retorno."
+---
+
+O **OneSignal** é o provedor de **push notifications** do PrismaFlow. A credencial é a **conexão** com
+a sua conta do OneSignal: ela autentica os envios e define como reconhecer cada destinatário. O texto
+da notificação não fica aqui — ele mora num **template de push**, que é a próxima seção.
+
+Esta página cobre as abas **Configuração** e **Mapeamento**. A aba **Conexão** (provedor e nome) está
+em [Provedores](/integracoes/provedores).
+
+## Configuração
+
+A aba reúne três grupos de campos: as credenciais de acesso, os dados do app e a assinatura de retorno.
+
+<Frame caption="Aba Configuração do OneSignal.">
+  <img src="/images/anotadas/criar-credencial-one-signal-pt2.png" alt="Aba Configuração da credencial OneSignal" />
+</Frame>
+
+### Credenciais de acesso
+
+<ParamField body="Chave de API do OneSignal" type="texto" required>
+  A API Key da sua conta, encontrada no OneSignal em **Settings → Keys & IDs**. Depois de salva, fica
+  guardada no cofre e não aparece mais na tela.
+</ParamField>
+
+### Dados do app
+
+<ParamField body="App ID do OneSignal" type="UUID" required>
+  O identificador do app, também em **Settings → Keys & IDs** no painel do OneSignal.
+</ParamField>
+
+<ParamField body="Idiomas suportados" type="lista" required>
+  Os idiomas que esta credencial aceita (ex.: português e inglês). Eles **limitam** em quais idiomas o
+  template de push poderá escrever o título e o corpo.
+</ParamField>
+
+### Assinatura de retorno
+
+<ParamField body="Segredo de assinatura" type="texto">
+  Opcional. Serve para **validar os eventos de retorno** (entregue, clicado, descadastro) que o
+  OneSignal envia de volta. Sem ele, esses eventos são aceitos sem verificação.
+</ParamField>
+
+## Mapeamento
+
+<Frame caption="Aba Mapeamento: a identidade que o OneSignal usa para reconhecer cada destinatário.">
+  <img src="/images/anotadas/criar-credencial-one-signal-pt3.png" alt="Aba Mapeamento da credencial OneSignal" />
+</Frame>
+
+<ParamField body="Origem do ID externo" type="seleção" required>
+  Qual identidade do perfil o OneSignal usa para saber **para qual aparelho** enviar. Na hora do envio,
+  o valor dessa identidade é o que identifica o destinatário no OneSignal.
+</ParamField>
+
+<Warning>
+  Essa identidade precisa apontar para **um único destinatário**. Se ela corresponder a mais de um
+  aparelho ou usuário no OneSignal, o envio **falha** — cada ação de jornada deve atingir exatamente
+  uma pessoa.
+</Warning>
+
+## Validação
+
+Validar a credencial dispara uma **checagem real** na conta do OneSignal: o PrismaFlow consulta o app
+pelo App ID usando a chave de API. Respondendo certo, a credencial fica validada. Os erros mais comuns
+são **chave de API inválida** ou **App ID inexistente**.
+
+## O conteúdo é um template
+
+A credencial é só a conexão — ela não guarda o texto da notificação. O **título**, o **corpo** e os
+extras ficam num **template de push** (a próxima seção, **Templates**), que pode usar variáveis
+`{{ }}` preenchidas no [nó de Ação → Variáveis](/jornadas/nos) da jornada. O ponto de ligação entre os
+dois: os **idiomas suportados** que você definiu aqui determinam em quais idiomas o template pode
+escrever.
+
+## Eventos de retorno
+
+O OneSignal consegue avisar de volta quando uma notificação foi **entregue**, **clicada**, **falhou**
+ou levou a um **descadastro**. Para receber esses avisos, configure no painel do OneSignal a URL de
+retorno do PrismaFlow. Os eventos entram no histórico da ação e alimentam as métricas de conversão da
+jornada — e, se você preencheu o **segredo de assinatura**, o PrismaFlow confirma que cada aviso veio
+mesmo do OneSignal.

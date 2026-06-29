@@ -1,0 +1,102 @@
+---
+title: "Webhook"
+description: "Credencial Webhook (HTTP genérico): URL base, cabeçalhos padrão, assinatura HMAC e timeout; o mapeamento no cabeçalho X-PrismaCDP-User; os cabeçalhos automáticos; e onde as variáveis aparecem."
+---
+
+O **Webhook** é o provedor **HTTP genérico** do PrismaFlow. Em vez de enviar por um serviço pronto, ele
+faz uma **chamada HTTP** para um **endereço seu** — ideal para integrar com seu CRM, ERP ou qualquer
+sistema. A credencial define **para onde** enviar e **como autenticar**; o **formato** da chamada
+(método, caminho, corpo) fica num **template**, na próxima seção.
+
+Esta página cobre as abas **Configuração** e **Mapeamento**. A aba **Conexão** (provedor e nome) está
+em [Provedores](/integracoes/provedores).
+
+<Note>
+  Diferente do OneSignal, o Webhook **não tem chave secreta**. A autenticação fica por conta dos
+  **cabeçalhos** que você definir (por exemplo, um `Authorization`) e/ou da **assinatura HMAC**.
+</Note>
+
+## Configuração
+
+<Frame caption="Aba Configuração do Webhook.">
+  <img src="/images/anotadas/criar-credencial-webhook-pt2.png" alt="Aba Configuração da credencial Webhook" />
+</Frame>
+
+### Destino
+
+<ParamField body="URL base" type="URL" required>
+  O endereço de destino. Precisa começar com `https://` (endereços sem segurança são recusados). O
+  caminho específico de cada envio vem do template e é somado a essa base.
+</ParamField>
+
+<ParamField body="Cabeçalhos HTTP padrão" type="pares chave/valor">
+  Cabeçalhos enviados em **toda** requisição — normalmente a autenticação do seu sistema (por exemplo,
+  um `Authorization`) ou a identificação de tenant.
+</ParamField>
+
+### Comportamento de envio
+
+<ParamField body="Header de assinatura" type="texto" default="X-Signature">
+  O nome do cabeçalho em que a assinatura HMAC viaja. Vem preenchido, mas você pode trocar.
+</ParamField>
+
+<ParamField body="Timeout (ms)" type="número" default="10000">
+  Quanto tempo esperar pela resposta antes de desistir, de **1.000** a **60.000** ms (1 s a 60 s).
+</ParamField>
+
+<ParamField body="Segredo de assinatura" type="texto">
+  Opcional. Com ele, o PrismaFlow assina o corpo de cada requisição (HMAC-SHA256) e envia a assinatura
+  no cabeçalho acima — assim o **seu** endpoint confirma que a chamada veio do PrismaFlow e não foi
+  adulterada. Sem ele, nenhuma assinatura é enviada.
+</ParamField>
+
+## Mapeamento
+
+<Frame caption="Aba Mapeamento: a identidade que vai no cabeçalho X-PrismaCDP-User.">
+  <img src="/images/anotadas/criar-credencial-webhook-pt3.png" alt="Aba Mapeamento da credencial Webhook" />
+</Frame>
+
+<ParamField body="Origem do ID externo" type="seleção" required>
+  Qual identidade do perfil identifica o destinatário. O valor dela é enviado automaticamente, em toda
+  requisição, no cabeçalho `X-PrismaCDP-User` — então o seu endpoint reconhece o usuário sem precisar
+  vasculhar o corpo.
+</ParamField>
+
+## Cabeçalhos automáticos
+
+Além dos seus, o PrismaFlow **sempre** acrescenta três cabeçalhos, que **não podem ser
+sobrescritos**:
+
+| Cabeçalho | Para que serve |
+| --- | --- |
+| `X-Idempotency-Key` | Identifica unicamente o envio, evitando processar a mesma ação duas vezes. |
+| `X-PrismaCDP-User` | O destinatário definido no **Mapeamento**. |
+| `Content-Type: application/json` | Indica que o corpo é JSON (incluído quando há corpo). |
+
+Em caso de cabeçalhos repetidos, a prioridade é: os da **credencial** podem ser sobrescritos pelos do
+**template**, e os **automáticos** acima sempre prevalecem.
+
+## O formato da chamada é um template
+
+A credencial diz **para onde** e **como autenticar**. O **método** (`GET`, `POST`…), o **caminho**, os
+**parâmetros**, os **cabeçalhos** e o **corpo** são definidos num **template de webhook** — a próxima
+seção (**Templates**).
+
+As variáveis `{{ }}` podem aparecer nos dois lados: em campos da **credencial** (a **URL base** e os
+**cabeçalhos padrão** aceitam `{{ }}` — por exemplo, uma base `https://api.{{tenant}}.exemplo.com`) e
+nos campos do **template**. Em todos os casos, quem define de onde vem cada valor é o
+[nó de Ação → Variáveis](/jornadas/nos) da jornada.
+
+## Validação e entrega
+
+A validação do Webhook **não faz uma chamada de teste** — ela só confere os campos (URL `https://` e
+mapeamento válidos). O endereço pode até não existir; um erro de URL só aparece no **primeiro envio
+real**.
+
+O Webhook **não tem eventos de retorno** (entrega, clique). O resultado de cada envio é simples:
+
+- **Enviada** — o seu endpoint respondeu com sucesso.
+- **Falhou** — respondeu com erro ou estourou o tempo limite.
+
+Falhas **temporárias** (erro de servidor, tempo esgotado, rede instável, limite de taxa) podem ser
+**retentadas**; um erro **definitivo** de requisição, não — repetir não resolveria.

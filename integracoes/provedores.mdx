@@ -1,0 +1,153 @@
+---
+title: "Provedores"
+icon: "plug"
+description: "As credenciais que conectam o PrismaFlow aos serviços de entrega (OneSignal para push, Webhook HTTP): como criar, validar e ativar, o ciclo de vida, a segurança das chaves e onde as variáveis aparecem."
+---
+
+Para uma jornada **enviar** qualquer coisa — um push, uma chamada HTTP — o PrismaFlow precisa de uma
+**credencial de provedor**: a conexão configurada com o serviço externo que faz a entrega. Hoje há
+dois provedores:
+
+<CardGroup cols={2}>
+  <Card title="OneSignal" icon="bell" href="/integracoes/onesignal">
+    Canal **push** — notificações para celular e web.
+  </Card>
+  <Card title="Webhook" icon="webhook" href="/integracoes/webhook">
+    Canal **HTTP genérico** — uma requisição para um endereço seu.
+  </Card>
+</CardGroup>
+
+## Onde ficam
+
+As credenciais vivem na aba **Credenciais**, dentro de **Jornadas** — a área que reúne workflows,
+templates e credenciais no mesmo lugar. No topo, um painel resume a operação dos últimos 7 dias
+(instâncias ativas, taxa de conversão, ações entregues e taxa de falha); logo abaixo ficam as abas
+**Workflows**, **Templates** e **Credenciais**.
+
+<Frame caption="A aba Credenciais: o resumo da operação no topo e um cartão por credencial.">
+  <img src="/images/anotadas/credenciais-de-provedores.png" alt="Lista de credenciais de provedores" />
+</Frame>
+
+Cada credencial aparece como um **cartão** com o nome, o provedor, o canal (**push** ou **webhook**),
+o status, quantos templates a utilizam e há quanto tempo foi validada. No rodapé do cartão estão as
+ações de **rotacionar credenciais**, **editar** e **arquivar**, e um filtro por **canal** ajuda a
+encontrar a credencial certa. O botão **Nova credencial** abre o assistente de criação.
+
+## Criar uma credencial
+
+A criação tem **três abas**. A primeira, **Conexão**, é igual para todos os provedores; **Configuração**
+e **Mapeamento** mudam conforme o provedor escolhido.
+
+<Frame caption="Aba Conexão: o provedor e um nome para a credencial.">
+  <img src="/images/anotadas/criar-credencial-one-signal-pt1.png" alt="Aba Conexão da nova credencial" />
+</Frame>
+
+Na aba **Conexão** você define:
+
+<ParamField body="Provedor" type="seleção" required>
+  O serviço que essa credencial vai conectar (OneSignal ou Webhook). Não pode ser trocado depois que a
+  credencial é criada.
+</ParamField>
+
+<ParamField body="Nome" type="texto" required>
+  Um nome descritivo, que ajuda a localizar a credencial nas listagens e nos logs.
+</ParamField>
+
+Os campos das abas **Configuração** e **Mapeamento** dependem do provedor — veja
+[OneSignal](/integracoes/onesignal) e [Webhook](/integracoes/webhook). O botão **Criar** salva tudo
+como um **rascunho**, que ainda não envia nada.
+
+## Validar e ativar
+
+Antes de poder enviar, a credencial precisa passar por dois passos:
+
+<Steps>
+  <Step title="Validar">
+    O PrismaFlow testa a credencial. No **OneSignal**, isso é uma checagem real na conta (consultando o
+    app com a chave informada); no **Webhook**, é uma conferência local dos campos. Passando, a
+    credencial ganha o selo **Validada**.
+  </Step>
+  <Step title="Ativar">
+    Disponível só depois de validar com sucesso. Ativar coloca a credencial **em uso** e congela uma
+    **versão** da configuração.
+  </Step>
+</Steps>
+
+<Note>
+  **Por que uma versão congelada?** Ao ativar (ou ao atualizar/rotacionar depois), o PrismaFlow guarda
+  um retrato da configuração daquele momento. Templates e jornadas em andamento podem ficar presos a
+  essa versão — assim, mexer na credencial **não quebra** envios que já estavam acontecendo.
+</Note>
+
+## Ciclo de vida
+
+| Status | O que significa |
+| --- | --- |
+| **Rascunho** | Recém-criada; precisa ser validada e ativada antes de enviar. |
+| **Validada** | Passou no teste (selo) — pré-requisito para ativar. |
+| **Ativa** | Em uso; templates e jornadas podem enviar por ela. |
+| **Pausada** | Desligada temporariamente; pode ser reativada. |
+| **Arquivada** | Estado final — não volta atrás. |
+
+<Warning>
+  Não é possível **arquivar** uma credencial enquanto houver **jornadas ativas** usando ela — o sistema
+  bloqueia para não derrubar automações em produção. Troque ou pause essas jornadas antes.
+</Warning>
+
+## Segurança das chaves
+
+Chaves e segredos (como a API Key do OneSignal) **nunca ficam no banco** nem voltam a aparecer na tela
+depois de salvos — ficam num **cofre** dedicado. A interface mostra, no máximo, que um segredo **está
+definido**, nunca o valor em si. Para trocar uma chave, use **rotacionar credenciais**: gera uma nova
+versão sem apagar a anterior.
+
+## Variáveis `{{ }}`
+
+Alguns campos — tanto de **credenciais** quanto de **templates** — aceitam **variáveis** no formato
+`{{nome}}`: pequenos espaços que o PrismaFlow preenche, na hora do envio, com os dados reais de cada
+perfil (o primeiro nome, o valor do último pedido, e por aí vai).
+
+<Note>
+  **Credencial e template são coisas distintas.** A **credencial** é a *conexão* com o provedor; o
+  **template** é a *mensagem* em si, com seção própria (**Templates**, o próximo passo). As duas podem
+  usar `{{ }}` — por exemplo, a URL base de um Webhook e o corpo de um template — mas não se confundem.
+</Note>
+
+Quem define **de onde vem** cada valor é o nó de **Ação** da jornada, na etapa de variáveis. Veja o
+passo a passo em [Nós → Ação → Variáveis](/jornadas/nos). Se uma variável usada não tiver origem
+definida ali, o envio é **rejeitado**.
+
+<Tip>
+  Quando o campo é **só** a variável, o valor entra com o **tipo original** (um número continua
+  número); quando ela aparece **no meio de um texto**, vira texto.
+</Tip>
+
+## Eventos de entrega
+
+Cada ação enviada registra eventos de acompanhamento, que variam por provedor:
+
+| Evento | Significa | OneSignal | Webhook |
+| --- | --- | :---: | :---: |
+| **Na fila** | Ação criada, aguardando envio | ● | ● |
+| **Enviada** | Despachada ao provedor | ● | ● |
+| **Confirmada** | Endpoint respondeu com sucesso | — | ● |
+| **Entregue** | Chegou ao dispositivo | ● | — |
+| **Clicada** | Usuário clicou | ● | — |
+| **Falhou** | Erro no envio | ● | ● |
+| **Suprimida** | Perfil sem destino válido | ● | ● |
+| **Descadastro** | Usuário fez opt-out | ● | — |
+
+Os eventos pós-envio do OneSignal (entregue, clicada, descadastro) chegam de volta por um webhook de
+retorno do próprio OneSignal. O Webhook genérico não tem retorno — ele registra apenas **enviada** ou
+**falhou**.
+
+## Próximos passos
+
+<CardGroup cols={2}>
+  <Card title="OneSignal" icon="bell" href="/integracoes/onesignal">
+    Push: chave de API, App ID, idiomas, segredo de assinatura e o mapeamento do destinatário.
+  </Card>
+  <Card title="Webhook" icon="webhook" href="/integracoes/webhook">
+    HTTP genérico: URL base, cabeçalhos, assinatura HMAC, timeout e o mapeamento do destinatário.
+  </Card>
+</CardGroup>
