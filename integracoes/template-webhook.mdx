@@ -1,0 +1,69 @@
+---
+title: "Webhook"
+description: "Template de webhook: a aba Requisição (método e caminho nos modos Fixo/Lista/Livre) e as camadas Query, Headers e Body, com seus tipos de campo e variáveis {{ }}."
+---
+
+Um **template de webhook** é o modelo de uma **requisição HTTP**. Ele fica ligado a uma credencial
+[Webhook](/integracoes/webhook) e herda dela o **endereço base**, os cabeçalhos padrão, o tempo limite
+e a assinatura. O template define o resto: o **método**, o **caminho** e o conteúdo das camadas. Esta
+página cobre as abas **Requisição** e **Camadas** (a aba **Identificação**, comum a todos, está em
+[Templates](/integracoes/templates)).
+
+## Requisição
+
+Os dois campos centrais do webhook. Cada um trabalha em um dos
+[modos Fixo, Lista ou Livre](/integracoes/templates#modos-de-campo-fixo-lista-e-livre).
+
+<Frame caption="Aba Requisição: o método HTTP e o caminho do endpoint.">
+  <img src="/images/anotadas/criar-template-pt2-webhook.png" alt="Aba Requisição do template de webhook" />
+</Frame>
+
+<ParamField body="Método HTTP" type="seleção" default="POST">
+  O verbo da requisição: `GET`, `POST`, `PUT`, `PATCH` ou `DELETE`.
+</ParamField>
+
+<ParamField body="Path" type="texto" required>
+  O caminho do endpoint, que é somado ao endereço base da credencial. Precisa começar com `/` (ex.:
+  `/v1/events`). É um ótimo lugar para usar variáveis — por exemplo, `/v1/users/{{id_externo}}/eventos`.
+</ParamField>
+
+## Camadas
+
+No webhook, as camadas **já vêm prontas**: **Query**, **Headers** e **Body** aparecem sempre, e você
+só preenche as que precisar (cada uma começa com **0 campos**). Use a engrenagem de cada camada para
+configurar seus campos.
+
+<Frame caption="Aba Camadas do webhook: Query, Headers e Body, cada uma Fixa ou com variantes.">
+  <img src="/images/anotadas/criar-template-pt3-webhook.png" alt="Aba Camadas do template de webhook" />
+</Frame>
+
+| Camada | Para que serve |
+| --- | --- |
+| **Query** | Os parâmetros de query string da URL (ex.: `?versao=2`). |
+| **Headers** | Cabeçalhos específicos deste template, somados aos cabeçalhos padrão da credencial. |
+| **Body** | O corpo da requisição — normalmente o conteúdo principal enviado ao seu endpoint. |
+
+Como nos outros campos, cada camada pode ser **Fixa** (valores definidos) ou **com variantes**
+(conjuntos que a jornada escolhe no envio). Ao configurar os campos de uma camada, cada campo tem um
+**tipo**, que só ajusta o tipo de entrada na tela:
+
+| Tipo | Para que serve |
+| --- | --- |
+| **Texto** | Valores de texto simples (aceita `{{ }}`). |
+| **URL** | Um endereço completo. |
+| **Número** | Valores numéricos. |
+| **Chave-valor** | Pares de chave e valor (bom para metadados). |
+| **JSON** | Estruturas mais complexas, como listas ou objetos aninhados. |
+
+<Note>
+  Lembre dos cabeçalhos **automáticos** da credencial (`X-Idempotency-Key`, `X-PrismaCDP-User` e o
+  `Content-Type`): eles continuam sendo adicionados e têm prioridade sobre os cabeçalhos do template.
+  E, em requisições `GET`, o corpo é ignorado.
+</Note>
+
+## Variáveis `{{ }}`
+
+O webhook é onde as variáveis vão mais longe: **qualquer** campo pode ter `{{nome}}` — o caminho, os
+parâmetros de query, os cabeçalhos e o corpo. No envio, cada `{{ }}` é trocado pelo dado real do
+perfil, com a origem definida no [nó de Ação → Variáveis](/jornadas/nos) da jornada. Se uma variável
+usada ficar sem origem, o envio é **rejeitado**.

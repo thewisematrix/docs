@@ -1,7 +1,128 @@
 ---
 title: "Templates"
 icon: "envelope-open-text"
-description: "Os modelos de comunicação reutilizáveis (com layers, variantes e placeholders) usados pelos nós de ação das jornadas."
+description: "Modelos de mensagem reutilizáveis, ligados a uma credencial: os modos de campo (Fixo, Lista, Livre), as camadas, as variáveis {{ }} e o ciclo de vida do template."
 ---
 
-<Note>Em construção — aguardando o engine map e os prints.</Note>
+Um **template** é um **modelo de mensagem reutilizável**. Ele fica **ligado a uma credencial** e
+herda dela o canal e o provedor: um template de uma credencial OneSignal é um **push**; de uma
+credencial Webhook, uma **requisição HTTP**. A credencial diz *por onde* e *como autenticar*; o
+template diz *o que* é enviado.
+
+<CardGroup cols={2}>
+  <Card title="Template de Push" icon="bell" href="/integracoes/template-push">
+    Para credenciais OneSignal — título e corpo da notificação.
+  </Card>
+  <Card title="Template de Webhook" icon="webhook" href="/integracoes/template-webhook">
+    Para credenciais Webhook — método, caminho e corpo da requisição.
+  </Card>
+</CardGroup>
+
+## Onde ficam
+
+Os templates vivem na aba **Templates**, dentro de **Jornadas** — ao lado de Workflows e Credenciais.
+Cada template aparece como um **cartão** com o nome, a **credencial** que ele usa, o **canal** (push
+ou webhook), o **status** e quando foi atualizado pela última vez. Dois filtros — por **credencial**
+e por **status** — ajudam a achar o que você procura, e o botão **Novo template** abre o assistente.
+
+<Frame caption="A aba Templates: um cartão por template, com a credencial e o canal de cada um.">
+  <img src="/images/anotadas/templates-listagem.png" alt="Lista de templates" />
+</Frame>
+
+## Criar um template
+
+O assistente tem **três abas**. A primeira, **Identificação**, é igual para todos; a segunda muda de
+nome conforme o canal (**Mensagem** no push, **Requisição** no webhook); a terceira é **Camadas**.
+
+<Frame caption="Aba Identificação: a credencial que entrega a mensagem e um nome interno.">
+  <img src="/images/anotadas/criar-template-pt1-geral.png" alt="Aba Identificação do novo template" />
+</Frame>
+
+<ParamField body="Credencial" type="seleção" required>
+  A credencial que vai entregar a mensagem. É ela que define o **canal** (push ou webhook) e, portanto,
+  o tipo de template. Não pode ser trocada depois que o template é criado.
+</ParamField>
+
+<ParamField body="Nome do template" type="texto" required>
+  Um nome descritivo, para localizar o template nas listagens e nos logs.
+</ParamField>
+
+## Modos de campo: Fixo, Lista e Livre
+
+Este é o conceito central. Cada campo principal de um template (o título e o corpo, no push; o método
+e o caminho, no webhook) pode trabalhar em **um de três modos**, escolhido por um botãozinho ao lado
+do campo:
+
+<CardGroup cols={3}>
+  <Card title="Fixo" icon="lock">
+    O valor fica **gravado no template**, igual para todo envio. Bom para o que não muda.
+  </Card>
+  <Card title="Lista" icon="list">
+    Você cadastra **algumas opções** e marca uma como padrão. A jornada pode escolher outra na hora do
+    envio.
+  </Card>
+  <Card title="Livre" icon="wand-magic-sparkles">
+    O campo fica **em branco** no template — quem preenche é a **ação da jornada**. É o modo mais
+    dinâmico.
+  </Card>
+</CardGroup>
+
+<Note>
+  Mesmo um campo **Fixo** pode conter **variáveis `{{ }}`** no meio do texto. Ou seja: "Fixo" significa
+  que a *estrutura* é fixa, mas o texto ainda pode ter trechos preenchidos por perfil.
+</Note>
+
+## Camadas
+
+Além dos campos principais, um template pode ter **camadas** — grupos de **campos extras**. Cada
+camada funciona em um de dois modos:
+
+- **Fixa** — os campos têm valores definidos, usados em todo envio.
+- **Com variantes** — você cria conjuntos de valores (variantes) e marca um padrão; a jornada pode
+  escolher outra variante no envio.
+
+As camadas mudam conforme o canal: no **push** elas são **opcionais** (você adiciona se quiser); no
+**webhook** já vêm prontas (Query, Headers e Body). Os detalhes estão em cada página de tipo.
+
+## Variáveis `{{ }}`
+
+É aqui que as variáveis vivem de verdade. Qualquer texto de um template — o valor de um campo Fixo, as
+opções de uma Lista, os valores de uma camada — pode conter `{{nome}}`, que o PrismaFlow troca, no
+envio, pelo dado real do perfil. E os campos em modo **Livre** são preenchidos inteiros pela ação.
+
+Em todos os casos, **quem define de onde vem cada valor é o nó de Ação da jornada**, na etapa de
+variáveis — veja [Nós → Ação → Variáveis](/jornadas/nos). Se uma variável usada não tiver origem
+definida ali, o envio é **rejeitado**.
+
+## Ciclo de vida
+
+<Steps>
+  <Step title="Rascunho">
+    O template nasce como rascunho. Você monta e ajusta os campos à vontade; nada é enviado ainda.
+  </Step>
+  <Step title="Ativo">
+    Ao ativar, o template fica pronto para uso. Só é possível ativar se a **credencial** vinculada
+    estiver **ativa**. Cada ativação (e cada edição depois) gera uma **versão** do template.
+  </Step>
+  <Step title="Arquivado">
+    Estado final — o template sai de uso. Jornadas que já estavam rodando com ele continuam usando a
+    **versão** que tinham.
+  </Step>
+</Steps>
+
+<Note>
+  As **versões** existem para estabilidade: uma jornada que começou a usar a versão 3 de um template
+  continua na versão 3 mesmo que você edite o template depois — assim, mexer no template não muda as
+  comunicações que já estavam a caminho.
+</Note>
+
+## Próximos passos
+
+<CardGroup cols={2}>
+  <Card title="Template de Push" icon="bell" href="/integracoes/template-push">
+    Título e corpo localizados, modos de campo e camadas do OneSignal.
+  </Card>
+  <Card title="Template de Webhook" icon="webhook" href="/integracoes/template-webhook">
+    Método e caminho, e as camadas Query, Headers e Body.
+  </Card>
+</CardGroup>

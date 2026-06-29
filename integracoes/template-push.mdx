@@ -1,0 +1,65 @@
+---
+title: "Push"
+description: "Template de push (OneSignal): a aba Mensagem com título e corpo localizados nos modos Fixo/Lista/Livre, as camadas opcionais e as variáveis {{ }}."
+---
+
+Um **template de push** é o modelo de uma notificação. Ele fica ligado a uma credencial
+[OneSignal](/integracoes/onesignal) e define o **título** e o **corpo** da mensagem. Esta página cobre
+as abas **Mensagem** e **Camadas** (a aba **Identificação**, comum a todos, está em
+[Templates](/integracoes/templates)).
+
+## Mensagem
+
+A aba reúne os dois campos centrais do push. Cada um trabalha em um dos
+[modos Fixo, Lista ou Livre](/integracoes/templates#modos-de-campo-fixo-lista-e-livre).
+
+<Frame caption="Aba Mensagem: título e corpo, cada um com seus modos. Em Fixo, aparece um campo por idioma.">
+  <img src="/images/anotadas/criar-template-pt2-onesignal.png" alt="Aba Mensagem do template de push" />
+</Frame>
+
+<ParamField body="Título da mensagem" type="texto por idioma" required>
+  O texto principal da notificação (recomendado até 65 caracteres).
+</ParamField>
+
+<ParamField body="Corpo da mensagem" type="texto por idioma" required>
+  O conteúdo principal da notificação (recomendado até 240 caracteres).
+</ParamField>
+
+Os dois campos são **escritos por idioma**: no modo **Fixo**, aparece **um campo para cada idioma**
+que a credencial suporta (por exemplo, Português e Inglês). Os idiomas disponíveis vêm direto dos
+**Idiomas suportados** definidos na credencial OneSignal — escrever num idioma que a credencial não
+tem é recusado. No modo **Livre**, o campo não é preenchido aqui: ele é completado pela ação da
+jornada no envio.
+
+## Camadas
+
+No push, as **camadas são opcionais** — você só adiciona se precisar de campos além do título e do
+corpo. Comece em **Adicionar camada**.
+
+<Frame caption="Aba Camadas do push: opcional; nada vem pré-criado.">
+  <img src="/images/anotadas/criar-template-pt3-onesignal.png" alt="Aba Camadas do template de push" />
+</Frame>
+
+Os campos de uma camada de push entram **junto** do título e do corpo na notificação. São úteis para
+recursos extras do push, como:
+
+- **Link ao clicar** (deep link) — para onde a notificação leva.
+- **Ícones e imagem** — ícone pequeno, ícone grande, imagem expandida.
+- **Prioridade** e **tempo de vida** (validade da notificação).
+- **Dados extras** — um pacote de informações para o seu app receber junto.
+
+Como os outros campos, cada camada pode ser **Fixa** ou **com variantes** (conjuntos que a jornada
+escolhe no envio) — o conceito está em [Templates](/integracoes/templates#camadas).
+
+## Variáveis `{{ }}`
+
+O título, o corpo e os valores das camadas podem conter `{{nome}}` — por exemplo, um título
+`Olá {{primeiro_nome}}!`. No envio, esses trechos são trocados pelos dados reais do perfil, com a
+origem definida no [nó de Ação → Variáveis](/jornadas/nos) da jornada. Um campo em modo **Livre** vai
+além: ele é preenchido **inteiro** pela ação.
+
+<Note>
+  Você não precisa se preocupar com o **endereçamento** da notificação (para qual aparelho enviar,
+  identificadores do OneSignal): isso é resolvido automaticamente pela credencial e pelo seu
+  mapeamento. No template, você cuida só do **conteúdo**.
+</Note>

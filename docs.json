@@ -88,7 +88,16 @@
                   "integracoes/webhook"
                 ]
               },
-              "integracoes/templates"
+              {
+                "group": "Templates",
+                "icon": "envelope-open-text",
+                "root": "integracoes/templates",
+                "expanded": true,
+                "pages": [
+                  "integracoes/template-push",
+                  "integracoes/template-webhook"
+                ]
+              }
             ]
           }
         ]
