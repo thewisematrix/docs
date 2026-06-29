@@ -1,0 +1,146 @@
+---
+title: "Tipos de cláusula"
+description: "Os blocos de condição que montam um segmento: traits, eventos, contagem, agregação, funil e pertencimento a outro segmento."
+---
+
+As **cláusulas** são os blocos de condição de um [segmento](/audiencia/segmentos). Você as combina
+dentro de **grupos E/OU** e pode aninhar grupos para lógicas mais complexas. No builder, clique no
+**+** para abrir o menu com todos os tipos:
+
+<Frame caption="O menu 'Adicionar cláusula': grupos booleanos (E, OU, NÃO) no topo, depois cláusulas de trait, de evento e de segmento.">
+  <img src="/images/anotadas/criar-segmento-clausulas-2.png" alt="Menu de tipos de cláusula com os grupos E, OU e NÃO" />
+</Frame>
+
+## Grupos: E, OU e NÃO
+
+Antes das condições, vêm os grupos que dizem **como elas se combinam**:
+
+- **E (AND)** — todas as condições filhas precisam ser verdadeiras.
+- **OU (OR)** — pelo menos uma precisa ser verdadeira.
+- **NÃO (NOT)** — **inverte** a condição filha. Serve para **excluir** quem bate em algo — por
+  exemplo, _comprou nos últimos 30 dias **e não** está no segmento de cancelados_.
+
+Você pode aninhar grupos. Exemplo: _comprou nos últimos 30 dias **E** (é VIP **OU** tem gasto >
+R$ 5.000)_.
+
+<Note>
+  O grupo **NÃO** só aparece no menu quando a regra já tem **pelo menos uma cláusula positiva**.
+  Faz sentido: o segmento precisa primeiro de algo que **inclua** pessoas para depois você
+  **excluir** um grupo — senão não haveria audiência para negar. Monte a condição positiva (quem
+  entra) e só então use o NÃO para tirar quem você não quer.
+</Note>
+
+## Cláusulas de trait
+
+### Trait do perfil
+
+Compara um **trait** do perfil com um valor — por exemplo, `lifetime_value` **maior que** `100`.
+
+<Frame caption="Trait do perfil: a chave do trait, um operador e um valor.">
+  <img src="/images/anotadas/criar-segmento-trait-config.png?v=1" alt="Configuração da cláusula Trait do perfil" />
+</Frame>
+
+A chave segue o formato `traits.<chave>.value`. Os operadores incluem **é**, **não é**, **maior
+que**, **menor que**, **está em uma lista**, **contém** e **existe**.
+
+### Trait mudou
+
+Verifica se o trait **foi atualizado** dentro de uma janela de dias. Opcionalmente, você filtra
+pelo **novo valor** e/ou pelo **valor anterior**.
+
+<Frame caption="Trait mudou: chave, janela em dias e filtros opcionais por novo valor / valor anterior.">
+  <img src="/images/anotadas/criar-segmento-trait-change-config.png?v=1" alt="Configuração da cláusula Trait mudou" />
+</Frame>
+
+## Cláusulas de evento
+
+Todas as cláusulas de evento têm uma **janela em dias** (de 1 a 365) e uma aba de **Filtros** para
+condicionar as propriedades do evento.
+
+### Evento ocorreu
+
+O cliente **disparou** o evento dentro da janela.
+
+<Frame caption="Evento ocorreu: escolha o evento, a versão e a janela. A aba Filtros condiciona as propriedades.">
+  <img src="/images/anotadas/criar-segmento-evento-ocorreu-config.png?v=1" alt="Configuração da cláusula Evento ocorreu" />
+</Frame>
+
+### Evento não ocorreu
+
+O cliente **não disparou** o evento na janela. Ótimo para reengajamento — por exemplo, _não comprou
+nos últimos 60 dias_.
+
+<Frame caption="Evento não ocorreu: mesma configuração do anterior, mas com a lógica invertida.">
+  <img src="/images/anotadas/criar-segmento-evento-nao-ocorreu-config.png?v=1" alt="Configuração da cláusula Evento não ocorreu" />
+</Frame>
+
+### Contagem de eventos
+
+**Quantas vezes** o evento ocorreu na janela, comparado a um número — por exemplo, _comprou 3 vezes
+ou mais_. A aba **Contagem** define o operador e o valor.
+
+<Frame caption="Contagem de eventos: além de Evento e Filtros, a aba Contagem define o limiar (ex.: ≥ 3).">
+  <img src="/images/anotadas/criar-segmento-contagem-de-eventos-config.png?v=1" alt="Configuração da cláusula Contagem de eventos" />
+</Frame>
+
+### Agregação de evento
+
+Em vez de contar, **calcula** algo sobre uma propriedade numérica do evento — **soma**, **média**,
+**máximo** ou **mínimo** — e compara com um valor. Por exemplo, _soma de `amount` nas compras ≥
+R$ 1.000_. A configuração é como a de contagem, com uma aba para escolher a função e a propriedade.
+
+### Funil de eventos
+
+Uma **sequência ordenada** de eventos dentro da janela (até 10 etapas). O campo **Profundidade
+mínima** define **quantas etapas** o perfil precisa completar para entrar.
+
+<Frame caption="Funil: as etapas em ordem e a profundidade mínima (quantas etapas completar).">
+  <img src="/images/anotadas/criar-segmento-funil-de-eventos-config.png?v=1" alt="Configuração da cláusula Funil de eventos" />
+</Frame>
+
+## Cláusula de segmento
+
+### Pertence a segmento
+
+O perfil é **membro de outro segmento**. Permite reaproveitar audiências — por exemplo, _está em
+"Usuários VIP" **E** não comprou nos últimos 30 dias_.
+
+<Frame caption="Pertence a segmento: escolha outro segmento. Os que criariam um ciclo ficam desabilitados.">
+  <img src="/images/anotadas/criar-segmento-membership-config.png?v=1" alt="Configuração da cláusula Pertence a segmento" />
+</Frame>
+
+<Note>
+  Segmentos que criariam um **ciclo** (A depende de B que depende de A) ficam **desabilitados** na
+  lista — assim você não cria uma dependência circular sem querer.
+</Note>
+
+## Limites de uma regra
+
+Para manter as consultas saudáveis, uma regra tem limites:
+
+| Limite | Valor |
+| --- | --- |
+| Profundidade de aninhamento de grupos | 5 |
+| Total de nós (grupos + cláusulas) | 50 |
+| Cláusulas de trait | 20 |
+| Cláusulas de evento (incluindo funil) | 10 |
+| Cláusulas "Trait mudou" | 10 |
+| Cláusulas "Pertence a segmento" | 5 |
+| Filtros por cláusula | 10 |
+| Etapas de um funil | 10 |
+| Janela de tempo | 1 a 365 dias |
+
+## Bom saber
+
+<CardGroup cols={1}>
+  <Card title="A janela é sempre em dias" icon="calendar-days">
+    As cláusulas de evento e "Trait mudou" olham para uma janela recente — de 1 a 365 dias.
+  </Card>
+  <Card title="Só eventos ativos aparecem" icon="circle-check">
+    Os seletores de evento mostram apenas eventos com [definição](/eventos/definicoes) ativa.
+  </Card>
+  <Card title="O operador 'não existe' não vale aqui" icon="ban">
+    Nos filtros das cláusulas de evento dentro de um segmento, o operador **não existe** não é
+    suportado — use "Evento não ocorreu" para o caso de ausência.
+  </Card>
+</CardGroup>

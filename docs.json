@@ -44,6 +44,20 @@
               "eventos/identidades",
               "eventos/quarentena"
             ]
+          },
+          {
+            "group": "Audiência",
+            "pages": [
+              {
+                "group": "Segmentos",
+                "icon": "users",
+                "root": "audiencia/segmentos",
+                "expanded": true,
+                "pages": [
+                  "audiencia/tipos-de-clausula"
+                ]
+              }
+            ]
           }
         ]
       }

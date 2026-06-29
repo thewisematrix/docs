@@ -1,0 +1,131 @@
+---
+title: "Segmentos"
+icon: "users"
+description: "Audiências dinâmicas: grupos de perfis que entram e saem automaticamente conforme os dados mudam."
+---
+
+Um **segmento** é uma **audiência dinâmica** — um grupo de perfis que satisfazem um conjunto de
+condições. Diferente de uma lista fixa, ele é **vivo**: conforme os eventos chegam e os traits
+mudam, as pessoas **entram e saem sozinhas**. Por exemplo: _clientes que compraram nos últimos 30
+dias e têm gasto total acima de R$ 5.000_.
+
+<Note>
+  Pense num segmento como uma **busca salva que se atualiza sozinha**. Você descreve "quem entra"
+  uma vez; o PrismaFlow mantém a lista em dia a cada novo dado.
+</Note>
+
+## A aba Segmentos
+
+Os segmentos ficam em **Audiência → Segmentos**. No topo, um resumo da operação; embaixo, a lista.
+
+<Frame caption="Resumo (total de membros, entradas/saídas em 24h, execuções de hoje) e a lista de segmentos.">
+  <img src="/images/anotadas/segmentos-list.png?v=1" alt="Lista de segmentos com os cartões de resumo" />
+</Frame>
+
+Cada cartão mostra o **nome**, o **status** (Ativo/Pausado), o **modo** (Tempo real/Agendado), a
+versão, a descrição e quantos clientes estão dentro. Nas ações: **ativar/pausar** (interruptor),
+**reprocessar (↻)**, **editar** (lápis) e **arquivar**.
+
+## Tempo real ou agendado
+
+Todo segmento roda em um de dois modos — você escolhe na publicação:
+
+<CardGroup cols={2}>
+  <Card title="Tempo real" icon="bolt">
+    Reavaliado a cada evento ou mudança de identidade, com **latência de segundos**. Ideal quando a
+    automação precisa reagir na hora.
+  </Card>
+  <Card title="Agendado" icon="clock">
+    Reavaliado em lote conforme um intervalo (12h, 24h, 2d, 7d, 30d ou 60d). **Menor custo**. Ideal
+    para audiências que não precisam ser instantâneas.
+  </Card>
+</CardGroup>
+
+## Criar um segmento
+
+Clique em **Novo segmento** e monte a regra:
+
+<Steps>
+  <Step title="Comece pelo grupo raiz (E ou OU)">
+    Primeiro você escolhe **como as condições se combinam**: **E** (todas precisam ser
+    verdadeiras) ou **OU** (pelo menos uma). Dá para aninhar grupos depois, para lógicas mais
+    complexas.
+
+    <Frame caption="O grupo raiz define se as condições se combinam com E ou OU.">
+      <img src="/images/anotadas/criar-segmento-gatilho.png?v=1" alt="Modal Criar grupo raiz com as opções E e OU" />
+    </Frame>
+  </Step>
+
+  <Step title="Monte as condições no builder">
+    No canvas, clique no **+** para adicionar **cláusulas** (as condições) e novos grupos (E, OU
+    ou NÃO).
+
+    <Frame caption="O builder: o grupo (E/OU) combina as cláusulas; o + adiciona mais; Prévia e Publicar ficam embaixo.">
+      <img src="/images/anotadas/criar-segmento-flow.png?v=1" alt="Builder visual de segmento com nós de grupo e cláusulas" />
+    </Frame>
+
+    Existem **8 tipos de cláusula** (trait, evento ocorreu, contagem, funil…). Veja todos, com
+    exemplos, em [Tipos de cláusula](/audiencia/tipos-de-clausula).
+  </Step>
+
+  <Step title="Veja a prévia">
+    Antes de publicar, a **Prévia** mostra **quantos perfis** batem na regra agora, o **custo
+    estimado** da consulta e a **sobreposição** com segmentos que já existem ("usuários em comum").
+
+    <Frame caption="Prévia: contagem de perfis, custo estimado e sobreposição com outros segmentos.">
+      <img src="/images/anotadas/criar-segmento-preview.png?v=1" alt="Painel de prévia do segmento" />
+    </Frame>
+
+    O **custo** (baixo / médio / alto) indica o peso da consulta — regras com muitos eventos,
+    janelas longas ou muitos filtros custam mais. A **sobreposição** ajuda a perceber se você não
+    está recriando uma audiência que já existe.
+  </Step>
+
+  <Step title="Publique">
+    Dê um **nome**, uma **descrição** opcional e escolha o **modo de execução** (Tempo real ou
+    Agendado). Clique em **Publicar** e o segmento começa a popular na hora.
+
+    <Frame caption="Configurações de publicação: nome, descrição e modo de execução.">
+      <img src="/images/anotadas/criar-segmento-config-geral.png?v=1" alt="Modal de configurações de publicação do segmento" />
+    </Frame>
+  </Step>
+</Steps>
+
+## Depois de publicado
+
+- **Ativar / Pausar / Arquivar.** Pausar interrompe a reavaliação; arquivar é definitivo (terminal).
+- **Reprocessar (↻).** Recalcula o segmento inteiro do zero — útil depois de editar a regra ou
+  para corrigir a base.
+- **Editar.** Muda a definição e gera uma nova versão do segmento.
+
+## O que acontece quando alguém entra ou sai
+
+Sempre que um perfil **entra** ou **sai** de um segmento, isso pode **acionar jornadas** que usam o
+segmento como gatilho ("ao entrar no segmento") ou como condição de espera. Os segmentos são uma
+das principais pontes entre os seus dados e a automação.
+
+<Warning>
+  **Reprocessar um segmento mexe na automação.** Recalcular do zero pode gerar muitas entradas e
+  saídas de uma vez — e cada uma pode disparar jornadas. Reprocesse com cautela, especialmente em
+  segmentos grandes ligados a jornadas ativas.
+</Warning>
+
+## Bom saber
+
+<CardGroup cols={1}>
+  <Card title="Audiência viva" icon="arrows-rotate">
+    Você não gerencia a lista na mão: o PrismaFlow adiciona e remove perfis sozinho conforme os
+    dados mudam.
+  </Card>
+  <Card title="Tempo real custa mais que agendado" icon="scale-balanced">
+    Tempo real reage em segundos, mas pesa mais. Se a audiência não precisa ser instantânea, o modo
+    agendado entrega o mesmo resultado por menos.
+  </Card>
+  <Card title="A prévia evita audiências redundantes" icon="clone">
+    Antes de publicar, a sobreposição mostra o quanto o novo segmento se cruza com os existentes.
+  </Card>
+  <Card title="Há limites de tamanho na regra" icon="ruler">
+    Uma regra tem limites (nós, profundidade, número de cláusulas etc.). Os valores estão em
+    [Tipos de cláusula](/audiencia/tipos-de-clausula).
+  </Card>
+</CardGroup>
