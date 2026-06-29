@@ -1,9 +1,74 @@
 ---
 title: "Introdução"
 icon: "house"
-description: "Visão geral do PrismaFlow."
+description: "O PrismaFlow é uma CDP: reúne tudo o que acontece com cada cliente num perfil único e vivo, e te deixa segmentar, automatizar e enviar a mensagem certa na hora certa."
 ---
 
+O **PrismaFlow** é uma **CDP** — uma _Customer Data Platform_, ou Plataforma de Dados do Cliente. Em
+palavras simples: ele junta tudo o que acontece com cada cliente (compras, logins, cliques, cadastros)
+num **perfil único e vivo**, e te dá as ferramentas para **agir** sobre isso — agrupar pessoas,
+automatizar comunicações e enviar a mensagem certa na hora certa.
+
 <Note>
-  Página em construção. Vamos escrever este tema juntos no passo correspondente.
+  Esta documentação é feita para **qualquer pessoa do time**, não só para quem programa. Cada módulo
+  tem sua seção, com as telas explicadas e exemplos do dia a dia.
 </Note>
+
+## Como tudo se conecta
+
+Pense numa esteira, da coleta dos dados até a ação:
+
+<Steps>
+  <Step title="Os dados entram — Eventos">
+    Cada acontecimento (uma compra, um login) chega como um **evento**. A partir deles, o PrismaFlow
+    calcula **características** dos clientes (os *traits*) e resolve **identidades**, montando o perfil
+    de cada pessoa. É a base de tudo. Veja em [Eventos](/eventos/definicoes).
+  </Step>
+  <Step title="Você agrupa pessoas — Audiência">
+    Com os perfis ricos, você cria **segmentos**: audiências **vivas** que se atualizam sozinhas
+    conforme os dados mudam — por exemplo, _clientes que compraram nos últimos 30 dias_. Veja em
+    [Segmentos](/audiencia/segmentos).
+  </Step>
+  <Step title="Você automatiza — Jornadas">
+    As **jornadas** decidem o que acontece: quando alguém entra num segmento, ou um trait muda, a
+    pessoa entra num fluxo que **decide, espera e age** — em tempo real. Veja em
+    [Jornadas](/jornadas/visao-geral).
+  </Step>
+  <Step title="A mensagem sai — Integrações">
+    Quando a jornada precisa enviar algo, ela usa as **integrações**: as **credenciais** (a conexão com
+    o serviço de entrega) e os **templates** (a mensagem em si). Veja em
+    [Integrações](/integracoes/provedores).
+  </Step>
+</Steps>
+
+## Os módulos
+
+<CardGroup cols={2}>
+  <Card title="Eventos" icon="database" href="/eventos/definicoes">
+    A base de dados de cada perfil: definições de evento, computed traits, identidades e a quarentena.
+  </Card>
+  <Card title="Audiência" icon="users" href="/audiencia/segmentos">
+    Segmentos — audiências dinâmicas — e todos os tipos de cláusula para montá-los.
+  </Card>
+  <Card title="Jornadas" icon="route" href="/jornadas/visao-geral">
+    Automação visual: gatilhos de entrada, os nós do fluxo e o ciclo de vida de cada pessoa.
+  </Card>
+  <Card title="Integrações" icon="plug" href="/integracoes/provedores">
+    Provedores (OneSignal, Webhook) e templates de mensagem, com variáveis por perfil.
+  </Card>
+</CardGroup>
+
+## Por onde começar
+
+Se é a sua primeira vez, vale seguir a mesma ordem da esteira:
+
+1. Comece por [Eventos](/eventos/definicoes) para entender como os dados viram perfis.
+2. Aprenda a agrupar pessoas em [Segmentos](/audiencia/segmentos).
+3. Monte sua primeira automação em [Jornadas](/jornadas/visao-geral).
+4. Conecte um canal de envio em [Integrações](/integracoes/provedores).
+
+<Tip>
+  Não precisa decorar nada: cada página explica os conceitos do zero e mostra a tela
+  correspondente. Se bater dúvida, comece pela seção do módulo e siga os links — eles ligam um tema ao
+  outro na ordem natural.
+</Tip>
