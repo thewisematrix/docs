@@ -1,0 +1,197 @@
+---
+title: "Variações de nós"
+description: "Os blocos que montam uma jornada depois do gatilho — condição, espera (6 tipos), ação (com integração, template, política de falha e variáveis), teste A/B, objetivo e fim — com cada campo da tela descrito."
+---
+
+Depois do [gatilho](/jornadas/gatilhos), você monta a jornada com **nós** — cada bloco faz uma
+coisa. No builder, clique no **+** entre os nós para abrir o modal **"Adicionar nó"**, que lista
+**6 tipos**, cada um com nome e descrição:
+
+- **Condição** — _"Ramifica baseado em trait, identidade ou último evento."_
+- **Esperar** — _"Pausa por duração / até data / até evento / janela operacional."_
+- **Ação** — _"Email, SMS, push, WhatsApp, webhook, audience sync ou iniciar outra jornada."_
+- **Teste A/B** — _"Divide clientes em N variantes determinísticas."_
+- **Objetivo** — _"Mede conversão por evento ou condição."_
+- **Fim** — _"Encerra a branch atual."_
+
+<Frame caption="O modal 'Adicionar nó' com os 6 tipos.">
+  <img src="/images/anotadas/09-nos-de-progressao.png" alt="Menu de tipos de nó" />
+</Frame>
+
+Quase todos os modais de configuração terminam com um campo **Nome do nó (opcional)** (rótulo do nó
+no canvas) e os botões **Cancelar** e **Salvar** — a **Ação** é a exceção (tem um **Salvar** no topo
+e um **Nome do nó** obrigatório). Campos com **asterisco** na tela são obrigatórios.
+
+<Tip>
+  **Instantâneo × que aguarda.** Alguns nós resolvem **na hora** e o perfil segue na sequência
+  (**condição**, **teste A/B**, **fim**). Outros **pausam** o perfil até algo acontecer (**espera**,
+  **ação**, **objetivo**). É por isso que um perfil pode "ficar parado" num nó por horas ou dias —
+  está num nó que aguarda. Detalhes em [Como uma jornada roda](/jornadas/ciclo-de-vida).
+</Tip>
+
+## Condição
+
+Ramifica o perfil em **dois caminhos**: **Sim** (quando a condição é verdadeira) e **Não** (quando
+é falsa). Quem satisfaz segue pelo **Sim**; quem não, pelo **Não**. Se o ramo escolhido não tiver
+continuação, a jornada **termina** ali para quem cair nele.
+
+No modal **"Adicionar condição"**, o primeiro campo é a **ORIGEM** do dado, em três abas:
+
+- **Trait** — compara um [trait](/eventos/computed-traits) do perfil. Campos: **Trait** (a chave),
+  **Operador** (lista suspensa, com **é** pré-selecionado) e **Valor**. Ex.: `plano` **é** `premium`.
+- **Identidade** — olha uma identidade do perfil (ex.: se tem um `email`), comparando com um operador
+  e um valor.
+- **Último evento** — olha o **último** evento de um tipo que o perfil disparou, opcionalmente dentro
+  de uma janela de tempo (ex.: comprou nos últimos 7 dias?).
+
+<Frame caption="Adicionar condição: as abas de origem (Trait, Identidade, Último evento), o Trait, o Operador e o Valor.">
+  <img src="/images/anotadas/10-configurar-condicao-step-2.png" alt="Configuração do nó de condição" />
+</Frame>
+
+Você combina várias condições com os operadores **E**, **OU** e **NÃO**, do mesmo jeito que nos
+[segmentos](/audiencia/tipos-de-clausula). Uma observação importante: quando a jornada foi disparada
+por um **trait atualizado**, a condição enxerga o **valor mais recente** desse trait (o que acabou de
+mudar) — então dá para ramificar logo após o gatilho com o valor novo em mãos.
+
+## Espera
+
+**Pausa** o perfil até um momento ou condição. No modal **"Configurar espera"**, o primeiro campo é
+**Tipo de espera** (uma lista suspensa). Conforme o tipo, mudam os campos abaixo. Os **6 tipos**:
+
+<CardGroup cols={2}>
+  <Card title="Duração" icon="hourglass-half">
+    _"Cliente espera por um período fixo (minutos, horas ou dias) e depois segue."_ Campos:
+    **Esperar por** (um número, ex.: `1`) e **Unidade** (lista suspensa: **minuto(s)**, **hora(s)**
+    ou **dia(s)**).
+  </Card>
+  <Card title="Até data/hora" icon="calendar">
+    Segura o perfil até uma **data e hora** específicas que você informa.
+  </Card>
+  <Card title="Até evento" icon="bolt">
+    Espera até o perfil **disparar um evento** escolhido. Aceita um **tempo limite** opcional.
+  </Card>
+  <Card title="Até condição" icon="circle-check">
+    Espera até uma **condição** ficar verdadeira (ex.: um trait virar X). Tempo limite opcional.
+  </Card>
+  <Card title="Até segmento" icon="users">
+    Espera até o perfil **entrar ou sair** de um segmento escolhido. Tempo limite opcional.
+  </Card>
+  <Card title="Janela operacional" icon="clock">
+    Segura o perfil até cair dentro de um **horário permitido** (ex.: 08:00–20:00, no fuso do app) —
+    evita disparar de madrugada.
+  </Card>
+</CardGroup>
+
+<Frame caption="Configurar espera: o Tipo de espera (aqui, Duração) com Esperar por e Unidade.">
+  <img src="/images/anotadas/11-no-de-espera.png" alt="Configuração do nó de espera" />
+</Frame>
+
+<Note>
+  As esperas que aguardam algo (**até evento / condição / segmento**) e a **janela operacional**
+  aceitam um **tempo limite**. Se o tempo passar sem o que era esperado, o perfil é retomado pela
+  **expiração** e segue mesmo assim — assim a jornada nunca trava para sempre num nó de espera.
+</Note>
+
+## Ação
+
+Faz algo de fato. Diferente dos outros, a Ação abre um **editor de página inteira** com um botão
+**Salvar** no topo e **três abas** à esquerda: **Geral**, **Conteúdo** e **Variáveis**.
+
+### Aba Geral
+
+Define **o que** enviar e **como tratar falhas**. Campos:
+
+- **Tipo de ação** (lista suspensa, **Push** por padrão — _"Push notification mobile/web."_). Os
+  tipos cobrem **email, SMS, push, WhatsApp, webhook, audience sync** e **iniciar outra jornada**.
+- **Integração** (lista suspensa, _"Selecione uma integração"_) — o provedor que vai entregar.
+- **Template** (lista suspensa, _"Selecione um template"_) — fica **desabilitado** até você escolher
+  a integração; a tela avisa: _"Selecione uma integração para listar templates."_
+- **Nome do nó** (obrigatório) — _"Usado para identificar a comunicação nas métricas de conversão."_
+- **Interromper a instância se esta ação falhar** (interruptor, **desligado** por padrão) — _"Quando
+  ligado, a instância é encerrada se a entrega falhar… Desligado, a instância continua mesmo após a
+  falha."_ Ou seja: **ligado** = a falha **para** a jornada para aquele perfil; **desligado** = a
+  jornada **segue** mesmo se a ação falhar.
+
+<Frame caption="Configurar ação — aba Geral: Tipo de ação, Integração, Template, Nome do nó e a política de falha.">
+  <img src="/images/anotadas/12-no-de-acoes.png" alt="Configuração do nó de ação — aba Geral" />
+</Frame>
+
+A aba **Conteúdo** é onde você revê e **ajusta o conteúdo do template** (os overrides) para esta
+ação específica, sem mexer no template original.
+
+### Aba Variáveis
+
+Aqui cada placeholder do template recebe um valor **na hora do envio** — é o que deixa a mensagem
+personalizada por perfil. O título é **"Variáveis detectadas"**, com a instrução _"Para cada
+`{{ }}` usado no template ou override, defina de onde o valor vem em runtime."_ Para cada variável
+(ex.: `coupon_code`), você escolhe a **Fonte** numa lista suspensa com quatro opções:
+
+- **Valor fixo** — um valor literal, igual para todos.
+- **Trait** — um trait do perfil (ex.: `primeiro_nome`).
+- **Identidade** — uma identidade do perfil (email, telefone…).
+- **Função** — um valor calculado, como uma **propriedade do evento de entrada** (o que disparou a
+  jornada) ou a **data/hora atual**.
+
+<Frame caption="Aba Variáveis: para cada variável detectada, a Fonte (Valor fixo, Trait, Identidade ou Função).">
+  <img src="/images/anotadas/12-override-de-variaveis.png" alt="Aba Variáveis: fonte de cada variável" />
+</Frame>
+
+## Teste A/B
+
+Divide os perfis em **variantes** por **peso %**. No modal **"Configurar teste A/B"**, o subtítulo
+avisa: _"Re-sorteia a variante a cada nova entrada na jornada."_ Campos:
+
+- Um cabeçalho **"Variantes (N) · 100%"** mostra quantas variantes existem e se os pesos somam 100%,
+  e um botão **Distribuir igualmente** reparte os pesos por igual.
+- Cada variante é uma linha com **Key** (a chave interna, ex.: `a`), **Label** (o rótulo, ex.: `A`) e
+  **Peso %** (ex.: `20`), além de um ícone de **lixeira** para remover.
+- O botão **Adicionar variante** inclui mais uma linha.
+
+<Frame caption="Configurar teste A/B: cada variante tem Key, Label e Peso %, mais 'Distribuir igualmente'.">
+  <img src="/images/anotadas/14-test-a-b.png" alt="Configuração do nó de teste A/B" />
+</Frame>
+
+A divisão é **determinística**, não um sorteio aleatório: o **mesmo perfil sempre cai na mesma
+variante** naquela jornada. Cada variante vira um **caminho de saída** do nó (a saída leva o rótulo
+da variante). Como diz o subtítulo, se o perfil **reentrar** na jornada, ele pode cair em **outra**
+variante.
+
+## Objetivo
+
+Mede **conversão**. No modal **"Configurar objetivo"**, os campos são:
+
+- **Tipo de objetivo** (lista suspensa, **Evento de conversão** por padrão).
+- **Evento alvo** (obrigatório) e **Versão** (obrigatório) — o evento que conta como conversão.
+- **Tempo limite** (um número, ex.: `7`) + **Unidade** (lista suspensa, ex.: **dia(s)**) — a tela
+  explica: _"Janela máxima aguardando o evento. Se não acontecer, expira."_
+
+<Frame caption="Configurar objetivo: Tipo de objetivo, Evento alvo + Versão e o Tempo limite.">
+  <img src="/images/anotadas/13-no-de-objetivo.png" alt="Configuração do nó de objetivo" />
+</Frame>
+
+Se o perfil realizar o evento **dentro do tempo limite**, a jornada conta para ele como
+**convertida**. Se o tempo passar, o objetivo **expira** e o perfil segue sem conversão. É o que
+permite, depois, medir o **resultado** da jornada (quantos converteram).
+
+## Fim
+
+**Encerra o ramo atual** — não tem campos. Quando o perfil chega num nó de fim, a jornada termina
+para ele, marcada como **convertida** (se ele passou por um objetivo satisfeito) ou **concluída**,
+caso contrário. Uma jornada pode ter **vários fins**, um para cada ramo.
+
+## Bom saber
+
+<CardGroup cols={1}>
+  <Card title="Instantâneo × que aguarda" icon="stopwatch">
+    Condição, teste A/B e fim resolvem na hora; espera, ação e objetivo **pausam** o perfil até um
+    evento externo. Detalhes em [Como uma jornada roda](/jornadas/ciclo-de-vida).
+  </Card>
+  <Card title="Ação depende de integração e template" icon="plug">
+    Para enviar uma comunicação, a integração e o template precisam estar configurados — eles
+    alimentam as listas suspensas da aba Geral e os placeholders da aba Variáveis.
+  </Card>
+  <Card title="Condição e espera podem olhar o histórico" icon="clock-rotate-left">
+    A condição "último evento" e a espera "até evento" consultam os eventos do perfil — recursos
+    poderosos, porém mais pesados que olhar só um trait.
+  </Card>
+</CardGroup>

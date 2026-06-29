@@ -1,0 +1,122 @@
+---
+title: "Jornadas"
+icon: "route"
+description: "Automação visual: leve cada perfil por um fluxo de gatilho, condições, esperas e ações — em tempo real. Como montar, configurar e publicar uma jornada."
+---
+
+Uma **jornada** é uma **automação visual** — um fluxo por onde cada perfil caminha **sozinho**, em
+tempo real. Ela começa com um **gatilho** (quem entra) e segue por **nós** que decidem, esperam e
+agem. Por exemplo: _quando o perfil entra no segmento "carrinho abandonado", espere 1 hora, envie um
+push de lembrete e meça se ele comprou nos 7 dias seguintes._
+
+<Note>
+  A jornada é o ponto onde tudo se junta: ela usa [eventos](/eventos/definicoes),
+  [traits](/eventos/computed-traits), [identidades](/eventos/identidades) e
+  [segmentos](/audiencia/segmentos) como **entrada e condição**, e dispara **comunicações** (email,
+  push, SMS, WhatsApp, webhook) como **saída**.
+</Note>
+
+## Anatomia de uma jornada
+
+Toda jornada tem três partes:
+
+- **Gatilho** — o ponto de entrada. Define **quem** entra e **quando**. É sempre o primeiro nó, e a
+  jornada tem só um. Veja os 8 tipos em [Tipos de gatilhos](/jornadas/gatilhos).
+- **Nós** — os blocos que vêm depois: condição, espera, ação, teste A/B, objetivo e fim. Veja todos
+  em [Variações de nós](/jornadas/nos).
+- **O builder** — o canvas visual onde você liga os blocos, da esquerda (entrada) para a direita
+  (fins).
+
+### O builder por dentro
+
+No builder, o **gatilho** fica à esquerda; dele saem os **nós**, que se **ramificam** para a direita
+até os nós de **Fim** (uma jornada costuma ter vários fins, um por ramo). Cada nó aparece como um
+cartão com seu tipo e um resumo da configuração; entre dois nós há um **+** para inserir o próximo.
+
+A barra inferior tem **desfazer** e **refazer**, um botão de **configurações** (abre as
+Configurações da jornada) e, à direita, **Salvar** e **Publicar**. Enquanto você edita, um selo
+**"Rascunho salvo"** aparece no topo. Antes de publicar, um **validador** mostra um aviso de
+**problemas** (ex.: _"3 problemas"_) quando algo está incompleto — um nó sem saída, um campo
+obrigatório vazio. Você corrige as pendências e só então o **Publicar** entrega a jornada.
+
+<Frame caption="O builder: o gatilho à esquerda, os nós se ramificando ao centro e os nós de Fim à direita; embaixo, desfazer/refazer, Salvar e Publicar, e o aviso de problemas.">
+  <img src="/images/anotadas/15-flow-de-exemplo.png" alt="Builder visual de uma jornada" />
+</Frame>
+
+## Criar e publicar
+
+<Steps>
+  <Step title="Abra o builder e escolha o gatilho">
+    Clique em **Nova jornada**. O primeiro passo é escolher o **gatilho** — o tipo de entrada que
+    coloca os perfis na jornada (ver [Tipos de gatilhos](/jornadas/gatilhos)).
+  </Step>
+
+  <Step title="Monte o fluxo com nós">
+    No canvas, clique no **+** para adicionar [nós](/jornadas/nos) e ligar os caminhos. Você desenha
+    a lógica: ramificar com condições, pausar com esperas, enviar com ações, medir com objetivos e
+    encerrar com fins.
+  </Step>
+
+  <Step title="Configure a jornada">
+    Pelo botão de configurações, abre o modal **"Configurações da jornada"**, com os campos:
+
+    <Frame caption="Configurações da jornada: Nome, Chave (key), Descrição e Política de entrada.">
+      <img src="/images/anotadas/16-config-geral.png" alt="Modal de configurações da jornada" />
+    </Frame>
+
+    - **Nome** (obrigatório) — o nome da jornada (ex.: `Nova jornada`).
+    - **Chave (key)** — um identificador único gerado automaticamente (ex.:
+      `journey-7cb4bc71-...`), mas **editável**. Aceita só letras minúsculas, números, `-` e `_`; é
+      usado para referenciar a jornada por **API**.
+    - **Descrição (opcional)** — um texto livre para explicar a jornada.
+    - **Política de entrada** — _"Controla quantas vezes um cliente pode entrar nessa jornada."_ São
+      três opções em botões de seleção: **Uma vez (sempre)**, **Uma vez enquanto ativa** e
+      **Reentrar após cooldown** — detalhadas em
+      [Tipos de gatilhos](/jornadas/gatilhos#política-de-entrada).
+
+    Ao final, os botões **Cancelar** e **Criar jornada**.
+  </Step>
+
+  <Step title="Resolva as pendências e publique">
+    O builder **valida** o fluxo e mostra o aviso de **problemas** se algo estiver incompleto.
+    Corrija as pendências e clique em **Publicar**.
+  </Step>
+</Steps>
+
+<Warning>
+  Só uma jornada **publicada** recebe perfis. Enquanto estiver em **rascunho**, ela não dispara para
+  ninguém — é o seu espaço seguro para montar e revisar.
+</Warning>
+
+## Rascunho × publicada
+
+<CardGroup cols={2}>
+  <Card title="Rascunho" icon="pen-ruler">
+    Editável e invisível para o roteamento. Você monta e ajusta à vontade; nenhum perfil entra.
+  </Card>
+  <Card title="Publicada" icon="circle-play">
+    Ativa e recebendo perfis pelo gatilho. Cada publicação gera uma **versão** da jornada.
+  </Card>
+</CardGroup>
+
+## Como o perfil anda (resumo)
+
+Quando um perfil entra, ele vira uma **instância** da jornada — uma execução individual. Os nós
+**instantâneos** (condição, teste A/B, fim) passam na hora; os que **aguardam** (espera, ação,
+objetivo) pausam o perfil até algo acontecer. No fim, a instância é marcada como **convertida**,
+**concluída** ou um dos estados de parada. Os detalhes — todos os status, a diferença instantâneo ×
+que aguarda e a reentrada — estão em [Como uma jornada roda](/jornadas/ciclo-de-vida).
+
+## Próximos passos
+
+<CardGroup cols={3}>
+  <Card title="Tipos de gatilhos" icon="bolt" href="/jornadas/gatilhos">
+    Os 8 tipos de entrada e a política de entrada.
+  </Card>
+  <Card title="Variações de nós" icon="diagram-project" href="/jornadas/nos">
+    Condição, espera, ação, teste A/B, objetivo e fim.
+  </Card>
+  <Card title="Como uma jornada roda" icon="arrows-spin" href="/jornadas/ciclo-de-vida">
+    Status da instância, instantâneo × aguarda e reentrada.
+  </Card>
+</CardGroup>

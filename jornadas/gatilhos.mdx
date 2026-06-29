@@ -1,0 +1,230 @@
+---
+title: "Tipos de gatilhos"
+description: "Os 8 tipos de entrada de uma jornada — entrou/saiu do segmento, identidade resolvida, trait atualizado, perfil mesclado, agendamento único/recorrente e manual — com cada campo da tela explicado, quando usar e a política de entrada."
+---
+
+O **gatilho** é o que faz um perfil **entrar** numa jornada — é sempre o **primeiro nó**, e toda
+jornada tem **exatamente um**. Ele responde a duas perguntas: **quem** entra e **quando**. Só
+jornadas **publicadas** disparam; um rascunho nunca coloca ninguém na fila.
+
+Ao criar a jornada, abre-se o modal **"Escolha o tipo de gatilho"**, com o subtítulo _"O gatilho
+define quando e por que profiles entram nesta jornada."_ Ele lista **8 cartões**, cada um com nome e
+uma frase explicando quando dispara:
+
+- **Entrou no segmento** — _"Quando um cliente entra em um segmento específico."_
+- **Saiu do segmento** — _"Quando um cliente sai de um segmento específico."_
+- **Identidade resolvida** — _"Quando uma identidade é resolvida (signup, login)."_
+- **Trait atualizado** — _"Quando uma trait muda de valor."_
+- **Perfil mesclado** — _"Quando um cliente é mesclado em outro."_
+- **Agendamento único** — _"Em uma data e hora específicas."_
+- **Agendamento recorrente** — _"Em um cronograma recorrente (cron)."_
+- **Manual** — _"Acionada manualmente pelo cliente."_
+
+<Frame caption="O modal 'Escolha o tipo de gatilho' com os 8 cartões.">
+  <img src="/images/anotadas/01-jornada-tipos-de-gatilhos.png" alt="Menu de tipos de gatilho" />
+</Frame>
+
+Esses 8 tipos se dividem em três famílias: **reativos** (reagem a algo que aconteceu com o perfil:
+entrou num segmento, fez login, um trait mudou, dois perfis se fundiram), **agendados** (disparam
+por tempo: uma data ou um cronograma) e **manual** (você dispara sob demanda). O resumo de qual
+usar:
+
+| Você quer começar a jornada quando… | Use o gatilho |
+| --- | --- |
+| o perfil passa a fazer parte de um público | **Entrou no segmento** |
+| o perfil deixa de fazer parte de um público | **Saiu do segmento** |
+| o perfil faz login / cadastro (uma identidade é reconhecida) | **Identidade resolvida** |
+| uma característica do perfil muda de valor | **Trait atualizado** |
+| dois cadastros do mesmo cliente viram um | **Perfil mesclado** |
+| chegar uma data e hora específicas | **Agendamento único** |
+| for um horário recorrente (todo dia, toda semana…) | **Agendamento recorrente** |
+| você decidir na hora, ou um sistema seu chamar via API | **Manual** |
+
+<Note>
+  **A moldura é igual em todos os tipos.** Depois de escolher, abre o modal **"Configurar gatilho"**,
+  que sempre tem: no topo, um bloco **TIPO DE GATILHO** mostrando o tipo atual, sua descrição e um
+  botão **Trocar** (volta para a escolha sem fechar); ao final, um campo **Nome do nó (opcional)**
+  para rotular o gatilho no canvas; e os botões **Cancelar** e **Salvar**. Campos com **asterisco**
+  na tela são obrigatórios. Abaixo descrevo só os campos **específicos** de cada tipo.
+</Note>
+
+## Gatilhos reativos
+
+### Entrou no segmento · Saiu do segmento
+
+Dispara quando o perfil **entra** (ou **sai**) de um [segmento](/audiencia/segmentos). Como os
+segmentos são audiências vivas, essa entrada/saída acontece sozinha conforme os dados do perfil
+mudam — e é esse movimento que a jornada escuta.
+
+**Campos da tela:**
+
+- **Segmento** (obrigatório) — uma lista suspensa com os seus segmentos; é o público cuja
+  entrada/saída dispara a jornada.
+- **Filtros adicionais** (interruptor, desligado por padrão) — ao ligar, aparece um seletor de
+  operador com três opções, e o botão **Adicionar condição** para incluir quantas condições quiser:
+  - **TODAS** — _"Todas as condições precisam ser verdadeiras."_
+  - **QUALQUER** — _"Pelo menos uma das condições precisa ser verdadeira."_
+  - **NENHUMA** — _"Inverte: a condição abaixo precisa ser falsa."_
+
+**Saiu do segmento** é idêntico, só que escuta a **saída**. Quando usar: _Entrou no segmento
+"carrinho abandonado"_ para iniciar uma régua de recuperação; _Saiu do segmento "clientes ativos"_
+para começar uma jornada de reconquista.
+
+<Frame caption="Entrou no segmento: o campo Segmento e o interruptor Filtros adicionais com TODAS / QUALQUER / NENHUMA.">
+  <img src="/images/anotadas/02-gatilho-entrou-no-segmento.png" alt="Configuração do gatilho Entrou no segmento" />
+</Frame>
+
+### Identidade resolvida
+
+Dispara quando uma **identidade** do perfil é **resolvida** — ou seja, quando o PrismaFlow reconhece
+e amarra um identificador (email, telefone, `user_id`…) àquele perfil. Na prática, costuma acontecer
+num **cadastro (signup)** ou **login**. Por padrão, **qualquer** resolução dispara.
+
+**Campos da tela (ambos opcionais):**
+
+- **Eventos elegíveis (opcional)** — uma ou mais linhas com dois seletores, **Evento** e **Versão**,
+  mais o botão **Adicionar evento elegível** para incluir outra linha (e um ícone de **lixeira** para
+  remover). Limita o gatilho a resoluções acompanhadas de um evento específico (ex.: só junto de um
+  `SignUp@1`). Útil para separar "resolveu no cadastro" de "resolveu num login qualquer".
+- **Tipos de identidade (opcional)** — um campo onde você lista os tipos que disparam (ex.: só
+  `email`, ignorando resoluções por `telefone`).
+
+Quando usar: jornada de **boas-vindas / onboarding** logo após o primeiro cadastro.
+
+<Frame caption="Identidade resolvida: Eventos elegíveis (Evento + Versão) e Tipos de identidade, ambos opcionais.">
+  <img src="/images/anotadas/04-gatilho-identidade-resolvida.png" alt="Configuração do gatilho Identidade resolvida" />
+</Frame>
+
+### Trait atualizado
+
+Dispara quando um **trait** do perfil **muda de valor**.
+
+**Campo da tela:**
+
+- **Chave do trait** (obrigatório) — a chave do trait a observar (ex.: `status`, `plano`).
+
+O gatilho reage a **qualquer** mudança daquele trait. Nos bastidores, o sinal carrega o **valor
+novo** e o **valor anterior** — então a jornada "sabe" de onde para onde o trait mudou. Se você
+precisa agir **só numa transição específica** (ex.: _só quando `status` vira `cancelado`_), deixe o
+gatilho observando o trait e adicione logo depois um nó de [condição](/jornadas/nos) que confere o
+valor: o gatilho abre a porta para toda mudança, e a condição filtra o caso que interessa. Quando
+usar: reagir a `plano` virando `premium` (upsell) ou a `status` virando `cancelado` (retenção).
+
+<Frame caption="Trait atualizado: o único campo é a Chave do trait.">
+  <img src="/images/anotadas/05-gatilho-trait-atualizado.png" alt="Configuração do gatilho Trait atualizado" />
+</Frame>
+
+### Perfil mesclado
+
+Dispara quando **dois perfis são unificados** — quando a resolução de identidade percebe que dois
+cadastros eram a mesma pessoa e os funde num só (veja o merge em
+[Identidades](/eventos/identidades)).
+
+**Não tem campos.** A própria tela informa: _"Aciona automaticamente quando perfis são mesclados;
+sem configuração adicional."_ Quem entra na jornada é o **perfil vencedor** (o que sobreviveu à
+unificação, já com os dados consolidados). Quando usar: reavaliar o cliente "completo" depois de
+juntar históricos — recalcular um benefício, reenviar uma comunicação agora que o perfil está
+unificado.
+
+<Frame caption="Perfil mesclado: dispara automaticamente, sem configuração.">
+  <img src="/images/anotadas/06-gatilho-perfil-mesclado.png" alt="Configuração do gatilho Perfil mesclado" />
+</Frame>
+
+## Gatilhos agendados
+
+Os dois agendados rodam por **tempo**. No horário marcado, o PrismaFlow resolve quem está na
+audiência **naquele momento** e coloca cada perfil na jornada. Dois campos aparecem em ambos:
+
+- **Fuso horário** (obrigatório) — ex.: `America/Sao_Paulo` (valor que vem preenchido por padrão).
+- **Audiência** (obrigatório) — uma lista suspensa: um [segmento](/audiencia/segmentos) específico
+  ou **todos** os perfis do app.
+
+### Agendamento único
+
+Roda **uma vez**. Além de fuso e audiência, tem:
+
+- **Data e hora** (obrigatório) — o instante exato do disparo (com um seletor de calendário).
+
+Quando usar: um disparo pontual — o aviso de uma promoção que começa numa data, um comunicado único
+para um segmento.
+
+<Frame caption="Agendamento único: Data e hora, Fuso horário e Audiência.">
+  <img src="/images/anotadas/07-gatilho-agendamento-unico.png" alt="Configuração do gatilho Agendamento único" />
+</Frame>
+
+### Agendamento recorrente
+
+Roda **repetidamente**. A configuração tem **quatro abas** que mudam os campos:
+
+- **Diária** — só o **Horário** (ex.: `09:00`). Roda todo dia nesse horário.
+- **Semanal** — o **Horário** e os **Dias da semana** (caixas de seleção **Seg, Ter, Qua, Qui, Sex,
+  Sáb, Dom**). Roda nos dias marcados.
+- **Mensal** — o **Horário** e o **dia do mês**. Roda uma vez por mês nesse dia.
+- **Avançado** — uma **expressão cron** livre, para horários que os atalhos não cobrem.
+
+Logo abaixo, um bloco destacado **"QUANDO VAI EXECUTAR"** traduz a configuração para linguagem comum
+(ex.: _"Toda segunda-feira às 09:00."_) — confirme aí antes de salvar. Quando usar: uma régua
+semanal de engajamento, um lembrete mensal de fatura, um resumo diário.
+
+<Frame caption="Agendamento recorrente (aba Semanal): Horário, Dias da semana e a prévia 'Quando vai executar'.">
+  <img src="/images/anotadas/08-gatilho-recorrente-tab-semanal.png" alt="Configuração do gatilho Agendamento recorrente" />
+</Frame>
+
+## Gatilho manual
+
+A jornada é **acionada sob demanda** — pela interface ("acionar jornada") ou por uma **chamada de
+API**. Não tem campos de configuração. Quando usar: disparos avulsos feitos por uma pessoa, ou
+**entrada programática** a partir de um sistema seu (seu backend decide o momento e chama a API para
+colocar o perfil na jornada).
+
+## Política de entrada
+
+Independentemente do gatilho, a **política de entrada** controla **quantas vezes** um mesmo perfil
+pode entrar na jornada. É uma trava de negócio configurada na [tela da
+jornada](/jornadas/visao-geral) (não no modal do gatilho) e vale para **todos** os gatilhos. São
+três modos:
+
+<CardGroup cols={1}>
+  <Card title="Uma vez (sempre)" icon="lock">
+    O perfil entra **no máximo uma vez**, para sempre — mesmo depois de a jornada terminar para ele.
+    A tela descreve: _"O cliente entra na jornada uma única vez. Disparos futuros do gatilho são
+    ignorados, mesmo após a execução terminar."_ Ideal para fluxos que só fazem sentido uma vez por
+    pessoa, como um onboarding.
+  </Card>
+  <Card title="Uma vez enquanto ativa" icon="arrows-rotate">
+    Não entra de novo **enquanto ainda estiver dentro** da jornada, mas **pode reentrar** depois que
+    terminar: _"Enquanto o cliente está executando a jornada, novos disparos são ignorados. Depois
+    que ele termina ou sai, pode entrar de novo."_ Evita instâncias duplicadas ao mesmo tempo.
+  </Card>
+  <Card title="Reentrar após cooldown" icon="hourglass-half">
+    Pode reentrar, mas só depois de um **tempo de espera** (cooldown) desde a última saída: _"Após
+    sair da jornada, o cliente só pode reentrar depois do tempo de espera definido."_ Bom para
+    réguas que se repetem sem incomodar a pessoa toda hora.
+  </Card>
+</CardGroup>
+
+<Note>
+  A política de entrada é uma **proteção contra excesso**: evita bombardear o mesmo perfil com
+  reentradas. Vale **inclusive para o gatilho Manual** — se a política for "uma vez (sempre)",
+  chamadas manuais repetidas para o mesmo perfil são silenciosamente ignoradas. Além dela, há uma
+  proteção técnica que impede que **a mesma mensagem** (por um reprocessamento, por exemplo) crie
+  duas entradas para o mesmo perfil.
+</Note>
+
+## Bom saber
+
+<CardGroup cols={1}>
+  <Card title="Só jornadas publicadas recebem perfis" icon="paper-plane">
+    Uma jornada em **rascunho** não dispara para ninguém. Publique para começar a receber entradas —
+    e lembre que cada publicação gera uma nova versão.
+  </Card>
+  <Card title="O gatilho liga a jornada ao resto da plataforma" icon="link">
+    Gatilhos de segmento, trait e identidade conectam as jornadas aos outros módulos: uma mudança
+    nos [eventos](/eventos/definicoes), [computed traits](/eventos/computed-traits) ou
+    [segmentos](/audiencia/segmentos) vira uma entrada aqui.
+  </Card>
+  <Card title="Filtre na entrada para não desperdiçar passos" icon="filter">
+    Quanto mais preciso o gatilho (segmento certo, filtros adicionais, eventos elegíveis), menos
+    perfis entram "à toa" — o que deixa a jornada mais barata e os relatórios mais limpos.
+  </Card>
+</CardGroup>

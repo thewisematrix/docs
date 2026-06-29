@@ -58,6 +58,22 @@
                 ]
               }
             ]
+          },
+          {
+            "group": "Jornadas",
+            "pages": [
+              {
+                "group": "Jornadas",
+                "icon": "route",
+                "root": "jornadas/visao-geral",
+                "expanded": true,
+                "pages": [
+                  "jornadas/gatilhos",
+                  "jornadas/nos",
+                  "jornadas/ciclo-de-vida"
+                ]
+              }
+            ]
           }
         ]
       }

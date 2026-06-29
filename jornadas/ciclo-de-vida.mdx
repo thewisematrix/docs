@@ -1,0 +1,97 @@
+---
+title: "Como uma jornada roda"
+description: "O ciclo de vida de uma instância: o que é uma instância, nós instantâneos × que aguardam, os 9 status possíveis e quando um perfil pode reentrar."
+---
+
+Quando um perfil entra numa [jornada](/jornadas/visao-geral), ele vira uma **instância** — a
+execução individual daquele perfil naquela jornada. Esta página explica como a instância anda, por
+que às vezes ela "fica parada" num nó, em que **status** ela pode estar e quando um perfil pode
+**entrar de novo**.
+
+## A instância
+
+Cada perfil que entra cria **uma** instância. Ela guarda em que **passo** o perfil está e o que
+disparou a entrada. Mil perfis na mesma jornada são mil instâncias rodando em paralelo — cada uma
+no seu próprio ritmo, sem interferir nas outras.
+
+## Instantâneo × que aguarda
+
+Os [nós](/jornadas/nos) têm dois comportamentos, e entender isso explica quase tudo sobre o ritmo
+de uma jornada:
+
+<CardGroup cols={2}>
+  <Card title="Instantâneos" icon="bolt">
+    **Condição**, **teste A/B** e **fim**. Resolvem na hora — o perfil pode atravessar vários de uma
+    vez, sem pausa.
+  </Card>
+  <Card title="Que aguardam" icon="hourglass-half">
+    **Espera**, **ação** e **objetivo**. **Pausam** a instância até um sinal externo: o tempo
+    passar, um evento chegar, a comunicação ser entregue ou o objetivo ser batido.
+  </Card>
+</CardGroup>
+
+Por isso é **normal** um perfil ficar "parado" num nó por horas ou dias — ele está num nó que
+aguarda. Exemplo: _condição → espera 2 dias → enviar push_. As condições passam num piscar; a espera
+segura o perfil por 2 dias; só então a ação dispara.
+
+## Os status de uma instância
+
+Ao longo da vida, a instância passa por um destes **9 status**:
+
+### Em andamento
+
+| Status | O que significa |
+| --- | --- |
+| **Ativa** | Está progredindo pelos nós. |
+| **Aguardando** | Parada num nó de espera, ação ou objetivo, esperando um sinal externo. |
+| **Pausada** | A jornada foi **pausada pelo operador** — as instâncias congelam até a jornada ser retomada. |
+
+### Terminou
+
+| Status | O que significa |
+| --- | --- |
+| **Convertida** | Chegou ao fim **tendo batido um objetivo**. É o melhor desfecho. |
+| **Concluída** | Chegou ao fim **sem** objetivo satisfeito — terminou normalmente. |
+| **Expirada** | Estourou um **tempo limite global** da instância (quando configurado). |
+| **Cancelada** | Cancelada **na mão**, ou porque a jornada foi **arquivada**. |
+| **Suprimida** | O perfil deu **opt-out global** de comunicações e foi retirado. |
+| **Falhou** | Algo deu errado — por exemplo, uma ação marcada como "interromper se falhar" falhou. |
+
+<Note>
+  **Convertida** e **concluída** são os dois finais "saudáveis": a diferença é só se o perfil passou
+  por um nó de **objetivo** satisfeito. Os demais (expirada, cancelada, suprimida, falhou) são
+  paradas antes do fim natural.
+</Note>
+
+## Reentrada
+
+Quando a instância termina, o perfil **pode ou não** entrar de novo — quem decide é a **política de
+entrada** da jornada:
+
+- **Uma vez (sempre)** — não entra mais, nunca.
+- **Uma vez enquanto ativa** — pode reentrar **depois** de terminar, mas nunca duas instâncias ao
+  mesmo tempo.
+- **Reentrar após cooldown** — pode reentrar, respeitando um **tempo de espera** desde a última
+  saída.
+
+Os detalhes de cada modo estão em [Gatilhos](/jornadas/gatilhos#política-de-entrada).
+
+## Bom saber
+
+<CardGroup cols={1}>
+  <Card title="Pausar congela; retomar continua" icon="circle-pause">
+    Pausar a jornada congela as instâncias onde elas estão. Ao retomar, cada uma segue **de onde
+    parou** — quem aguardava volta a aguardar, quem progredia volta a progredir.
+  </Card>
+  <Card title="Uma instância não roda em loop infinito" icon="shield-check">
+    Há um limite interno de passos que protege contra fluxos que se enrolam. Se algo sair do
+    esperado, a instância termina como **falhou** em vez de rodar para sempre.
+  </Card>
+  <Card title="A mesma entrada não conta duas vezes" icon="copy">
+    Se o mesmo sinal chegar repetido (por reprocessamento, por exemplo), a jornada **não** cria duas
+    instâncias para o mesmo perfil.
+  </Card>
+  <Card title="Arquivar a jornada encerra as instâncias" icon="box-archive">
+    Arquivar uma jornada **cancela** as instâncias que ainda estavam rodando nela.
+  </Card>
+</CardGroup>
